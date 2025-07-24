@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book Room</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h2>Book a Room</h2>
+  <form method="post">
+    <label>Start Time:</label>
+    <input name="start_time" type="datetime-local" required><br>
+    <label>End Time:</label>
+    <input name="end_time" type="datetime-local" required><br>
+    <button type="submit">Book</button>
+  </form>
+  <p>{{ msg }}</p>
+  <a href="/history">View Booking History</a>
+</body>
+</html>

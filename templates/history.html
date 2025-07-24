@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Booking History</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h2>Your Bookings</h2>
+  <ul>
+    {% for booking in bookings %}
+      <li>Room {{ booking.room_number }} | {{ booking.start_time }} to {{ booking.end_time }}</li>
+    {% endfor %}
+  </ul>
+  <a href="/book">Book Another</a>
+</body>
+</html>

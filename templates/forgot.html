@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Recover Credentials</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h2>Recover Username/Password</h2>
+  <form method="post">
+    <input name="email" placeholder="Email" required><br>
+    <input name="secret" placeholder="Secret Info" required><br>
+    <button type="submit">Recover</button>
+  </form>
+
+  {% if username %}
+    <p>Username: {{ username }}</p>
+    <p>Password (hashed): {{ password }}</p>
+  {% endif %}
+  
+  <p>{{ msg }}</p>
+  <a href="/login">Back to Login</a>
+</body>
+</html>
