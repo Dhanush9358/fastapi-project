@@ -8,7 +8,8 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-    secret = Column(String) 
+    secret = Column(String)
+    bookings = relationship("Booking", back_populates="user")
 
 class Booking(Base):
     __tablename__ = "bookings"
@@ -17,4 +18,4 @@ class Booking(Base):
     room_number = Column(Integer)
     start_time = Column(String)
     end_time = Column(String)
-    user = relationship("User")
+    user = relationship("User", back_populates="bookings")

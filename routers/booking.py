@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Form, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import Booking
+from models import Booking, User
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
@@ -16,8 +16,10 @@ def get_db():
         db.close()
 
 @router.get("/book", response_class=HTMLResponse)
-def book_form(request: Request):
-    return templates.TemplateResponse("book.html", {"request": request})
+def book_form(request: Request, db: Session = Depends(get_db)):
+    bookings = db.query(Booking).join(User).all()
+    room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
+    return templates.TemplateResponse("book.html", {"request": request, "room_map": room_map})
 
 @router.post("/book")
 def book_room(
@@ -39,12 +41,12 @@ def book_room(
     available_rooms = [i for i in range(1, 11) if i not in booked]
 
     if not available_rooms:
-        return templates.TemplateResponse("book.html", {"request": request, "msg": "No rooms available for the selected time."})
+        return templates.TemplateResponse("book.html", {"request": request, "msg": "No rooms available for the selected time.", "room_map": []})
 
-    new_booking = Booking(user_id=user_id, room_number=available_rooms[0], start_time=start_time, end_time=end_time)
+    new_booking = Booking(user_id=int(user_id), room_number=available_rooms[0], start_time=start_time, end_time=end_time)
     db.add(new_booking)
     db.commit()
-    return templates.TemplateResponse("book.html", {"request": request, "msg": f"Room {available_rooms[0]} booked successfully!"})
+    return templates.TemplateResponse("book.html", {"request": request, "msg": f"Room {available_rooms[0]} booked successfully!", "room_map": []})
 
 @router.get("/history", response_class=HTMLResponse)
 def booking_history(request: Request, db: Session = Depends(get_db)):
