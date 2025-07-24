@@ -1,19 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Book Room</title>
+  <title>Room Booking</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h2>Book a Room</h2>
-  <form method="post">
-    <label>Start Time:</label>
-    <input name="start_time" type="datetime-local" required><br>
-    <label>End Time:</label>
-    <input name="end_time" type="datetime-local" required><br>
-    <button type="submit">Book</button>
-  </form>
-  <p>{{ msg }}</p>
-  <a href="/history">View Booking History</a>
+  <div class="container">
+    <h2>📅 Make a Room Reservation</h2>
+
+    {% if message %}
+      <p style="color: red;">{{ message }}</p>
+    {% endif %}
+
+    <form method="POST" action="/book">
+      <br>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required><br>
+
+      <label for="start_time">Time From:</label>
+      <input type="time" id="start_time" name="start_time" required><br>
+
+      <label for="end_time">Time To:</label>
+      <input type="time" id="end_time" name="end_time" required><br><br>
+
+      <button type="submit">Book Room</button>
+    </form>
+
+    <p>{{ msg }}</p>
+    <a href="/history">View Booking History</a>
+  </div>
 </body>
 </html>

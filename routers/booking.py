@@ -23,6 +23,7 @@ def book_form(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/book")
 def book_room(
+    name: str = Form(...),
     start_time: str = Form(...),
     end_time: str = Form(...),
     request: Request = None,
@@ -43,7 +44,13 @@ def book_room(
     if not available_rooms:
         return templates.TemplateResponse("book.html", {"request": request, "msg": "No rooms available for the selected time.", "room_map": []})
 
-    new_booking = Booking(user_id=int(user_id), room_number=available_rooms[0], start_time=start_time, end_time=end_time)
+    new_booking = Booking(
+        user_id=int(user_id),
+        room_number=available_rooms[0],
+        start_time=start_time,
+        end_time=end_time,
+        name=name  # <-- store the name
+    )
     db.add(new_booking)
     db.commit()
     return templates.TemplateResponse("book.html", {"request": request, "msg": f"Room {available_rooms[0]} booked successfully!", "room_map": []})

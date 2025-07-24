@@ -18,4 +18,5 @@ class Booking(Base):
     room_number = Column(Integer)
     start_time = Column(String)
     end_time = Column(String)
+    name = Column(String)  # <-- added name field
     user = relationship("User", back_populates="bookings")
