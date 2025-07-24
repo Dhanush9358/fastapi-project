@@ -8,7 +8,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-    secret = Column(String)  # for password recovery
+    secret = Column(String) 
 
 class Booking(Base):
     __tablename__ = "bookings"
