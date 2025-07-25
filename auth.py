@@ -84,6 +84,19 @@ def register_post(
             "request": request,
             "msg": "Username or Email already exists"
         })
+    
+    hashed_pw = hash_password(password)
+    new_user = User(
+        username=username,
+        email=email,
+        password=hashed_pw,
+        security_key=security_key
+    )
+
+    db.add(new_user)
+    db.commit()
+
+    return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
     # if db.query(User).filter(User.username == username).first():
     #     return templates.TemplateResponse("register.html", {
     #         "request": request,
@@ -96,29 +109,29 @@ def register_post(
     #         "msg": "Email already registered"
     #     })
 
-    try:
-        hashed_pw = hash_password(password)
-        new_user = User(
-            username=username,
-            email=email,
-            password=hashed_pw,
-            security_key=security_key
-        )
-        db.add(new_user)
-        db.commit()
-        return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-    except IntegrityError:
-        db.rollback()
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": "Registration failed due to duplicate entry"
-        })
-    except Exception:
-        db.rollback()
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": "Something went wrong. Try again."
-        })
+    # try:
+    #     hashed_pw = hash_password(password)
+    #     new_user = User(
+    #         username=username,
+    #         email=email,
+    #         password=hashed_pw,
+    #         security_key=security_key
+    #     )
+    #     db.add(new_user)
+    #     db.commit()
+    #     return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
+    # except IntegrityError:
+    #     db.rollback()
+    #     return templates.TemplateResponse("register.html", {
+    #         "request": request,
+    #         "msg": "Registration failed due to duplicate entry"
+    #     })
+    # except Exception:
+    #     db.rollback()
+    #     return templates.TemplateResponse("register.html", {
+    #         "request": request,
+    #         "msg": "Something went wrong. Try again."
+    #     })
 
 @router.get("/forgot")
 def forgot_get(request: Request):
