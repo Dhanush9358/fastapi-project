@@ -3,9 +3,9 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.exc import IntegrityError
 from models import User
 from database import get_db
-from sqlalchemy.exc import IntegrityError
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -56,6 +56,7 @@ def register_post(
     security_key: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    # Validate inputs
     if not email.endswith("@gmail.com"):
         return templates.TemplateResponse("register.html", {
             "request": request,
@@ -74,18 +75,10 @@ def register_post(
             "msg": "Security Key must be at least 4 characters"
         })
 
-    # Check for duplicates
-    existing_user = db.query(User).filter(
-        (User.username == username) | (User.email == email)
-    ).first()
-    
-    if existing_user:
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": "Username or Email already exists"
-        })
-    
+    # Hash password
     hashed_pw = hash_password(password)
+
+    # Attempt to create new user
     new_user = User(
         username=username,
         email=email,
@@ -93,45 +86,24 @@ def register_post(
         security_key=security_key
     )
 
-    db.add(new_user)
-    db.commit()
+    try:
+        db.add(new_user)
+        db.commit()
+        return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
 
-    return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-    # if db.query(User).filter(User.username == username).first():
-    #     return templates.TemplateResponse("register.html", {
-    #         "request": request,
-    #         "msg": "Username already exists"
-    #     })
+    except IntegrityError:
+        db.rollback()
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Username or Email already registered"
+        })
 
-    # if db.query(User).filter(User.email == email).first():
-    #     return templates.TemplateResponse("register.html", {
-    #         "request": request,
-    #         "msg": "Email already registered"
-    #     })
-
-    # try:
-    #     hashed_pw = hash_password(password)
-    #     new_user = User(
-    #         username=username,
-    #         email=email,
-    #         password=hashed_pw,
-    #         security_key=security_key
-    #     )
-    #     db.add(new_user)
-    #     db.commit()
-    #     return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-    # except IntegrityError:
-    #     db.rollback()
-    #     return templates.TemplateResponse("register.html", {
-    #         "request": request,
-    #         "msg": "Registration failed due to duplicate entry"
-    #     })
-    # except Exception:
-    #     db.rollback()
-    #     return templates.TemplateResponse("register.html", {
-    #         "request": request,
-    #         "msg": "Something went wrong. Try again."
-    #     })
+    except Exception:
+        db.rollback()
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Something went wrong. Please try again."
+        })
 
 @router.get("/forgot")
 def forgot_get(request: Request):
