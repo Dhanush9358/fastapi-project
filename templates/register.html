@@ -90,9 +90,7 @@
 <body>
   <div class="container">
     <h2>📝 Register</h2>
-    {% if msg %}
-            <div class="msg">{{ msg }}</div>
-    {% endif %}
+  
 
     <form method="POST" action="/register" onsubmit="return validateForm()">
       <label for="username">Username:</label>
