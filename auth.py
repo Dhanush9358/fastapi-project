@@ -1,11 +1,15 @@
 from fastapi import APIRouter, Form, Request, Depends, status
 from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 from models import User
 from database import get_db
+
+
+
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -46,6 +50,7 @@ def register_post(
             "request": request,
             "msg": "Username or Email already exists"
         })
+    
 
     hashed_pw = pwd_context.hash(password)
     new_user = User(
