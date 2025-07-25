@@ -37,18 +37,21 @@ def register_post(
     if len(security_key) < 4:
         return templates.TemplateResponse("register.html", {"request": request, "msg": "Security key must be at least 4 characters"})
 
-    # ✅ Pre-check if username or email already exists
-    existing_user = db.query(User).filter(
-        (User.username == username) | (User.email == email)
-    ).first()
-
-    if existing_user:
+    # ✅ Check if username already exists
+    if db.query(User).filter(User.username == username).first():
         return templates.TemplateResponse("register.html", {
             "request": request,
-            "msg": "Username or Email already registered"
+            "msg": "Username already registered"
         })
 
-    # ✅ All good — create new user
+    # ✅ Check if email already exists
+    if db.query(User).filter(User.email == email).first():
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Email already registered"
+        })
+
+    # ✅ Create new user
     new_user = User(
         username=username,
         email=email,
@@ -59,6 +62,7 @@ def register_post(
     db.commit()
 
     return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
+
 
 @router.get("/login")
 def login_get(request: Request):
