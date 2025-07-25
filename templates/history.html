@@ -16,13 +16,13 @@
   </style>
 </head>
 <body>
-  <h2>Your Bookings</h2>
+  
   {% if request.cookies.user_id %}
     <div style="text-align: right;">
       <a href="/logout" style="color: red; text-decoration: none; font-weight: bold;" class="logout-link">Logout</a>
     </div>
   {% endif %}
-
+  <h2>Your Bookings</h2>
   <ul>
     {% for booking in bookings %}
       <li>
