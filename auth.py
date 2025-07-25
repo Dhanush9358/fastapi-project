@@ -3,7 +3,6 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.exc import IntegrityError
 from models import User
 from database import get_db
 
@@ -56,7 +55,6 @@ def register_post(
     security_key: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    # Validation checks
     if not email.endswith("@gmail.com"):
         return templates.TemplateResponse("register.html", {
             "request": request,
@@ -75,6 +73,14 @@ def register_post(
             "msg": "Security key must be at least 4 characters"
         })
 
+    # Check for existing username or email manually
+    existing_user = db.query(User).filter((User.username == username) | (User.email == email)).first()
+    if existing_user:
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Username or email already registered"
+        })
+
     hashed_pw = hash_password(password)
     user = User(
         username=username,
@@ -82,31 +88,9 @@ def register_post(
         password=hashed_pw,
         security_key=security_key
     )
-
     db.add(user)
-    try:
-        db.commit()
-        return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-    except IntegrityError as e:
-        db.rollback()
-        # Check if email or username exists
-        if "users.username" in str(e.orig):
-            msg = "Username already registered"
-        elif "users.email" in str(e.orig):
-            msg = "Email already registered"
-        else:
-            msg = "User already registered"
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": msg
-        })
-    except Exception as e:
-        db.rollback()
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": "Unexpected error: " + str(e)
-        })
-
+    db.commit()
+    return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
 
 @router.get("/forgot")
 def forgot_get(request: Request):
