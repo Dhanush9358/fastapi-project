@@ -37,14 +37,28 @@ def register_post(
     if len(security_key) < 4:
         return templates.TemplateResponse("register.html", {"request": request, "msg": "Security key must be at least 4 characters"})
 
-    new_user = User(username=username, email=email, password=hash_password(password), security_key=security_key)
+    # ✅ Pre-check if username or email already exists
+    existing_user = db.query(User).filter(
+        (User.username == username) | (User.email == email)
+    ).first()
+
+    if existing_user:
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Username or Email already registered"
+        })
+
+    # ✅ All good — create new user
+    new_user = User(
+        username=username,
+        email=email,
+        password=hash_password(password),
+        security_key=security_key
+    )
     db.add(new_user)
-    try:
-        db.commit()
-        return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-    except IntegrityError:
-        db.rollback()
-        return templates.TemplateResponse("register.html", {"request": request, "msg": "Username or Email already registered"})
+    db.commit()
+
+    return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
 
 @router.get("/login")
 def login_get(request: Request):
