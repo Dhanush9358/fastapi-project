@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Booking, User
 from fastapi.templating import Jinja2Templates
+from datetime import datetime
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -24,6 +25,7 @@ def book_form(request: Request, db: Session = Depends(get_db)):
 @router.post("/book")
 def book_room(
     name: str = Form(...),
+    date: str = Form(...),
     start_time: str = Form(...),
     end_time: str = Form(...),
     request: Request = None,
@@ -33,7 +35,18 @@ def book_room(
     if not user_id:
         return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
 
+    # Check past date/time
+    current_datetime = datetime.now()
+    booking_datetime = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+    if booking_datetime < current_datetime:
+        return templates.TemplateResponse("book.html", {
+            "request": request,
+            "msg": "You cannot book room for a past date or time.",
+            "room_map": []
+        })
+
     booked_rooms = db.query(Booking.room_number).filter(
+        Booking.date == date,
         Booking.start_time < end_time,
         Booking.end_time > start_time
     ).all()
@@ -42,18 +55,27 @@ def book_room(
     available_rooms = [i for i in range(1, 11) if i not in booked]
 
     if not available_rooms:
-        return templates.TemplateResponse("book.html", {"request": request, "msg": "No rooms available for the selected time.", "room_map": []})
+        return templates.TemplateResponse("book.html", {
+            "request": request,
+            "msg": "No rooms available for the selected date/time.",
+            "room_map": []
+        })
 
     new_booking = Booking(
         user_id=int(user_id),
         room_number=available_rooms[0],
+        date=date,
         start_time=start_time,
         end_time=end_time,
-        name=name  # <-- store the name
+        name=name
     )
     db.add(new_booking)
     db.commit()
-    return templates.TemplateResponse("book.html", {"request": request, "msg": f"Room {available_rooms[0]} booked successfully!", "room_map": []})
+    return templates.TemplateResponse("book.html", {
+        "request": request,
+        "msg": f"Room {available_rooms[0]} booked successfully!",
+        "room_map": []
+    })
 
 @router.get("/history", response_class=HTMLResponse)
 def booking_history(request: Request, db: Session = Depends(get_db)):

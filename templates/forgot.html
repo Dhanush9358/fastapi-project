@@ -1,23 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Recover Credentials</title>
+  <meta charset="UTF-8">
+  <title>🔐 Recover Credentials</title>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      padding: 2em;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 450px;
+      margin: auto;
+      background-color: #ffffff;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1em;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input[type="text"],
+    input[type="email"] {
+      height: 45px;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    button {
+      height: 45px;
+      font-size: 16px;
+      background-color: #0052cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #003d99;
+    }
+
+    .info, .msg {
+      margin-top: 1em;
+      padding: 1em;
+      border-radius: 8px;
+    }
+
+    .info {
+      background-color: #e6f7ff;
+      color: #005580;
+    }
+
+    .msg {
+      background-color: #ffe6e6;
+      color: #cc0000;
+      text-align: center;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 2em;
+      text-align: center;
+      font-weight: bold;
+      color: #0052cc;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <h2>Recover Username/Password</h2>
-  <form method="post">
-    <input name="email" placeholder="Email" required><br>
-    <input name="secret" placeholder="Secret Info" required><br>
-    <button type="submit">Recover</button>
-  </form>
+  <div class="container">
+    <h2>🔐 Recover Username / Password</h2>
+    
+    <form method="post">
+      <input type="email" name="email" placeholder="Enter your Email" required>
+      <input type="text" name="secret" placeholder="Enter your Security Key" required>
+      <button type="submit">Recover</button>
+    </form>
 
-  {% if username %}
-    <p>Username: {{ username }}</p>
-    <p>Password (hashed): {{ password }}</p>
-  {% endif %}
-  
-  <p>{{ msg }}</p>
-  <a href="/login">Back to Login</a>
+    {% if username %}
+      <div style="
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        max-width: 600px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        font-family: Arial, sans-serif;
+      ">
+        <p style="margin: 0 0 10px;"><strong>Username:</strong> {{ username }}</p>
+        <p style="margin: 0;"><strong>Hashed Password:</strong></p>
+        <pre style="
+          margin: 5px 0 0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          background-color: #eee;
+          padding: 10px;
+          border-radius: 5px;
+          font-size: 0.9em;
+          font-family: Consolas, monospace;
+        ">{{ password }}</pre>
+      </div>
+    {% endif %}
+
+
+
+
+
+    {% if msg %}
+    <div class="msg">{{ msg }}</div>
+    {% endif %}
+
+    <a href="/login" class="back-link">← Back to Login</a>
+  </div>
 </body>
 </html>

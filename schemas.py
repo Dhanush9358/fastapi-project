@@ -11,5 +11,6 @@ class UserLogin(BaseModel):
     password: str
 
 class BookingCreate(BaseModel):
+    date: str       # <-- NEW
     start_time: str
     end_time: str

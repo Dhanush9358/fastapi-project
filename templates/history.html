@@ -3,12 +3,32 @@
 <head>
   <title>Booking History</title>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 8px 0;
+      border-bottom: 1px solid #ccc;
+    }
+  </style>
 </head>
 <body>
   <h2>Your Bookings</h2>
+  {% if request.cookies.user_id %}
+    <div style="text-align: right;">
+      <a href="/logout" style="color: red; text-decoration: none; font-weight: bold;" class="logout-link">Logout</a>
+    </div>
+  {% endif %}
+
   <ul>
     {% for booking in bookings %}
-      <li><strong>{{ booking.name }}</strong> booked Room {{ booking.room_number }} | {{ booking.start_time }} to {{ booking.end_time }}</li>
+      <li>
+        <strong>{{ booking.name }}</strong> booked Room {{ booking.room_number }}<br>
+         Date: {{ booking.date }} | ⏰ {{ booking.start_time }} to {{ booking.end_time }}
+      </li>
     {% endfor %}
   </ul>
   <a href="/book">Book Another</a>
