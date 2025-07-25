@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
 
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     security_key = Column(String, nullable=False)
     bookings = relationship("Booking", back_populates="user")
@@ -16,7 +16,7 @@ class Booking(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     room_number = Column(Integer)
-    date = Column(String)  # <-- NEW FIELD
+    date = Column(String)
     start_time = Column(String)
     end_time = Column(String)
     name = Column(String)

@@ -4,7 +4,7 @@ from routers import user, booking
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-import auth
+from auth import router as auth_router
 
 
 # Create tables
@@ -23,5 +23,5 @@ def home(request: Request):
 # Include routers
 app.include_router(user.router)
 app.include_router(booking.router)
-app.include_router(auth.router)
+app.include_router(auth_router)
 
