@@ -40,7 +40,6 @@ def login_post(
             "msg": "Invalid username or password"
         })
     
-    # You can add session logic here later
     response = RedirectResponse(url="/book", status_code=status.HTTP_302_FOUND)
     response.set_cookie(key="user_id", value=str(user.id))
     return response
@@ -58,16 +57,37 @@ def register_post(
     security_key: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    # --- Server-side Validations ---
+    if not email.endswith("@gmail.com"):
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Email must end with @gmail.com"
+        })
+
+    if len(password) <= 8:
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Password must be at least 8 characters long"
+        })
+
+    if len(security_key) <= 4:
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Security key must be exactly 4 characters"
+        })
+
+    # --- Check if user already exists ---
     existing_user = db.query(User).filter(
         (User.username == username) | (User.email == email)
     ).first()
-    
+
     if existing_user:
         return templates.TemplateResponse("register.html", {
             "request": request,
             "msg": "Username or Email already exists"
         })
 
+    # --- Register new user ---
     hashed_pw = hash_password(password)
     new_user = User(
         username=username,
@@ -96,7 +116,7 @@ def forgot_post(
     user = db.query(User).filter(
         (User.email == email) & (User.security_key == secret)
     ).first()
-    
+
     if user:
         return templates.TemplateResponse("forgot.html", {
             "request": request,
@@ -114,4 +134,3 @@ def logout(request: Request):
     response = RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     response.delete_cookie("user_id")
     return response
-

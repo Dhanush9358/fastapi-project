@@ -115,5 +115,29 @@
     </div>
 
   </div>
+  <script>
+    function validateForm() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const key = document.getElementById("security_key").value;
+
+      if (!email.endsWith("@gmail.com")) {
+        alert("Email must end with @gmail.com");
+        return false;
+      }
+
+      if (password.length <= 8) {
+        alert("Password must be at least 8 characters long");
+        return false;
+      }
+
+      if (key.length <= 4) {
+        alert("Security Key must be at least 4 characters");
+        return false;
+      }
+
+      return true;
+    }
+  </script>
 </body>
 </html>
