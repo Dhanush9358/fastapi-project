@@ -56,7 +56,7 @@ def register_post(
     security_key: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    # Validate inputs
+    # Validation checks
     if not email.endswith("@gmail.com"):
         return templates.TemplateResponse("register.html", {
             "request": request,
@@ -72,38 +72,41 @@ def register_post(
     if len(security_key) < 4:
         return templates.TemplateResponse("register.html", {
             "request": request,
-            "msg": "Security Key must be at least 4 characters"
+            "msg": "Security key must be at least 4 characters"
         })
 
-    # Hash password
     hashed_pw = hash_password(password)
-
-    # Attempt to create new user
-    new_user = User(
+    user = User(
         username=username,
         email=email,
         password=hashed_pw,
         security_key=security_key
     )
 
+    db.add(user)
     try:
-        db.add(new_user)
         db.commit()
         return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-
-    except IntegrityError:
+    except IntegrityError as e:
+        db.rollback()
+        # Check if email or username exists
+        if "users.username" in str(e.orig):
+            msg = "Username already registered"
+        elif "users.email" in str(e.orig):
+            msg = "Email already registered"
+        else:
+            msg = "User already registered"
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": msg
+        })
+    except Exception as e:
         db.rollback()
         return templates.TemplateResponse("register.html", {
             "request": request,
-            "msg": "Username or Email already registered"
+            "msg": "Unexpected error: " + str(e)
         })
 
-    except Exception:
-        db.rollback()
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": "Something went wrong. Please try again."
-        })
 
 @router.get("/forgot")
 def forgot_get(request: Request):
