@@ -17,11 +17,12 @@ def hash_password(password: str):
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-# --- Pages ---
+# --- Index Page ---
 @router.get("/")
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# --- Login Page ---
 @router.get("/login")
 def login_get(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -34,16 +35,18 @@ def login_post(
     db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.username == username).first()
+
     if not user or not verify_password(password, user.password):
         return templates.TemplateResponse("login.html", {
             "request": request,
             "msg": "Invalid username or password"
         })
-    
+
     response = RedirectResponse(url="/book", status_code=status.HTTP_302_FOUND)
     response.set_cookie(key="user_id", value=str(user.id))
     return response
 
+# --- Register Page ---
 @router.get("/register")
 def register_get(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
@@ -57,26 +60,26 @@ def register_post(
     security_key: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    # --- Server-side Validations ---
+    # Validations
     if not email.endswith("@gmail.com"):
         return templates.TemplateResponse("register.html", {
             "request": request,
             "msg": "Email must end with @gmail.com"
         })
 
-    if len(password) <= 8:
+    if len(password) < 8:
         return templates.TemplateResponse("register.html", {
             "request": request,
-            "msg": "Password must be at least 8 characters long"
+            "msg": "Password must be at least 8 characters"
         })
 
-    if len(security_key) <= 4:
+    if len(security_key) < 4:
         return templates.TemplateResponse("register.html", {
             "request": request,
-            "msg": "Security key must be exactly 4 characters"
+            "msg": "Security Key must be at least 4 characters"
         })
 
-    # --- Check if user already exists ---
+    # Check for existing user
     existing_user = db.query(User).filter(
         (User.username == username) | (User.email == email)
     ).first()
@@ -87,7 +90,7 @@ def register_post(
             "msg": "Username or Email already exists"
         })
 
-    # --- Register new user ---
+    # Save user
     hashed_pw = hash_password(password)
     new_user = User(
         username=username,
@@ -95,7 +98,6 @@ def register_post(
         password=hashed_pw,
         security_key=security_key
     )
-
     db.add(new_user)
     db.commit()
 
@@ -123,12 +125,13 @@ def forgot_post(
             "username": user.username,
             "password": user.password
         })
-    else:
-        return templates.TemplateResponse("forgot.html", {
-            "request": request,
-            "msg": "Invalid email or security key"
-        })
 
+    return templates.TemplateResponse("forgot.html", {
+        "request": request,
+        "msg": "Invalid email or security key"
+    })
+
+# --- Logout ---
 @router.get("/logout")
 def logout(request: Request):
     response = RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
