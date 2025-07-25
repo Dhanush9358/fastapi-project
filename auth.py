@@ -75,17 +75,26 @@ def register_post(
         })
 
     # Check for duplicates
-    if db.query(User).filter(User.username == username).first():
+    existing_user = db.query(User).filter(
+        (User.username == username) | (User.email == email)
+    ).first()
+    
+    if existing_user:
         return templates.TemplateResponse("register.html", {
             "request": request,
-            "msg": "Username already exists"
+            "msg": "Username or Email already exists"
         })
+    # if db.query(User).filter(User.username == username).first():
+    #     return templates.TemplateResponse("register.html", {
+    #         "request": request,
+    #         "msg": "Username already exists"
+    #     })
 
-    if db.query(User).filter(User.email == email).first():
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": "Email already registered"
-        })
+    # if db.query(User).filter(User.email == email).first():
+    #     return templates.TemplateResponse("register.html", {
+    #         "request": request,
+    #         "msg": "Email already registered"
+    #     })
 
     try:
         hashed_pw = hash_password(password)
