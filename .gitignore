@@ -1,0 +1,16 @@
+# Ignore Python cache and environment
+__pycache__/
+*.__pycache__.venv/
+
+# But NOT these:
+!.gitignore
+!data.db
+!main.py
+!auth.py
+!database.py
+!models.py
+!schemas.py
+!requirements.txt
+!routers/
+!templates/
+!static/
