@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from database import Base, engine
 from auth import router as auth_router
 from routers import booking, user
+from models import User, Booking
 
 Base.metadata.create_all(bind=engine)
 

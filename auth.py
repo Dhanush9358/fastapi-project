@@ -37,25 +37,21 @@ def register_post(
     if len(security_key) < 4:
         return templates.TemplateResponse("register.html", {"request": request, "msg": "Security key must be at least 4 characters"})
 
-    # ✅ Check if username already exists
-    if db.query(User).filter(User.username == username).first():
+    existing_user = db.query(User).filter(
+        (User.username == username) | (User.email == email)
+    ).first()
+
+    if existing_user:
         return templates.TemplateResponse("register.html", {
             "request": request,
-            "msg": "Username already registered"
+            "msg": "Username or Email already exists"
         })
 
-    # ✅ Check if email already exists
-    if db.query(User).filter(User.email == email).first():
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": "Email already registered"
-        })
-
-    # ✅ Create new user
+    hashed_pw = pwd_context.hash(password)
     new_user = User(
         username=username,
         email=email,
-        password=hash_password(password),
+        password=hashed_pw,
         security_key=security_key
     )
     db.add(new_user)
