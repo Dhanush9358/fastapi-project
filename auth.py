@@ -79,7 +79,7 @@ def register_post(
             "msg": "Security Key must be at least 4 characters"
         })
 
-    # Check for existing user
+    # Check if user already exists
     existing_user = db.query(User).filter(
         (User.username == username) | (User.email == email)
     ).first()
@@ -90,18 +90,26 @@ def register_post(
             "msg": "Username or Email already exists"
         })
 
-    # Save user
-    hashed_pw = hash_password(password)
-    new_user = User(
-        username=username,
-        email=email,
-        password=hashed_pw,
-        security_key=security_key
-    )
-    db.add(new_user)
-    db.commit()
+    # Try to register user
+    try:
+        hashed_pw = hash_password(password)
+        new_user = User(
+            username=username,
+            email=email,
+            password=hashed_pw,
+            security_key=security_key
+        )
+        db.add(new_user)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "msg": "Something went wrong. Please try again."
+        })
 
     return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
+
 
 # --- Forgot Page ---
 @router.get("/forgot")
