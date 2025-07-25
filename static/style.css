@@ -26,6 +26,7 @@ body {
 form.form-styled {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 15px;
 }
 
@@ -55,8 +56,8 @@ form.form-styled label {
 
 /* Input box uniform style */
 form.form-styled input[type="text"],
-form.form-styled input[type="date"],
-form.form-styled input[type="time"] {
+form.form-styled input[type="email"],
+form.form-styled input[type="password"] {
   width: 100%;
   height: 45px;
   padding: 8px 12px;
@@ -76,6 +77,7 @@ form.form-styled button {
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  align-self: center;
 }
 
 form.form-styled button:hover {
