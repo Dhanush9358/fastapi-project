@@ -1,27 +1,20 @@
 from fastapi import FastAPI, Request
-from database import Base, engine
-from routers import user, booking
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from database import Base, engine
 from auth import router as auth_router
+from routers import booking, user
 
-
-# Create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Root route
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", include_in_schema=False)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Include routers
+app.include_router(auth_router)
 app.include_router(user.router)
 app.include_router(booking.router)
-app.include_router(auth_router)
-
