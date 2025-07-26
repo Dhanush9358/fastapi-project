@@ -43,6 +43,9 @@ def book_room(
     start = time.fromisoformat(start_time)
     end = time.fromisoformat(end_time)
 
+    booking_start_datetime = datetime.combine(booking_date, start)
+    # booking_end_datetime = datetime.combine(booking_date, end)
+
     # get latest booking map
     bookings = db.query(Booking).join(User).all()
     room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
@@ -55,15 +58,14 @@ def book_room(
             "room_map": room_map
         })
     
-    booking_start_datetime = datetime.combine(booking_date, start)
 
     if booking_start_datetime <= now:
         return templates.TemplateResponse("book.html", {
-        "request": request,
-        "message": "❌ Cannot book for a past date/time.",
-        "current_date": today.isoformat(),
-        "room_map": room_map
-    })
+            "request": request,
+            "message": "❌ Cannot book for a past date/time.",
+            "current_date": today.isoformat(),
+            "room_map": room_map
+        })
 
     
     # if booking_date == today and start < current_time:

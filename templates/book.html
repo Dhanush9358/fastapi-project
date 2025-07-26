@@ -61,6 +61,31 @@
     <a href="/history">View Booking History</a>
   </div>
 
+  <!-- <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const dateInput = document.getElementById("date");
+      const startInput = document.getElementById("start_time");
+      const endInput = document.getElementById("end_time");
+
+      function setMinStartTime() {
+        const today = new Date().toISOString().split("T")[0];
+        const selectedDate = dateInput.value;
+
+        if (selectedDate === today) {
+          const now = new Date();
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const minTime = `${hours}:${minutes}`;
+          startInput.min = minTime;
+        } else {
+          startInput.removeAttribute("min");
+        }
+      }
+
+      dateInput.addEventListener("change", setMinStartTime);
+      window.addEventListener("load", setMinStartTime);
+    });
+  </script> -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const startTimeInput = document.getElementById("start_time");
