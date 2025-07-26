@@ -61,15 +61,15 @@ def book_room(
         })
 
     available_room = None
-    for room_id in range(1, 11):
+    for room_number in range(1, 11):
         conflict = db.query(Booking).filter(
             Booking.date == booking_date,
-            Booking.room_id == room_id,
+            Booking.room_number == room_number,
             Booking.start_time < end,
             Booking.end_time > start
         ).first()
         if not conflict:
-            available_room = room_id
+            available_room = room_number
             break
 
     if not available_room:
@@ -83,7 +83,7 @@ def book_room(
     new_booking = Booking(
         name=name,
         user_id=int(user_id),
-        room_id=available_room,
+        room_number=available_room,
         date=booking_date,
         start_time=start,
         end_time=end
