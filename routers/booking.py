@@ -5,6 +5,7 @@ from database import SessionLocal
 from models import Booking, User
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
+import traceback
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -83,7 +84,6 @@ def book_room(
         return RedirectResponse("/history", status_code=status.HTTP_302_FOUND)
 
     except Exception as e:
-        import traceback
         traceback.print_exc()
         bookings = db.query(Booking).join(User).all()
         room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
