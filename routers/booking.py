@@ -11,9 +11,14 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/book", response_class=HTMLResponse)
 def book_form(request: Request, db: Session = Depends(get_db)):
+    today = date.today().isoformat()
+    bookings = db.query(Booking).join(User).all()
+    room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
     return templates.TemplateResponse("book.html", {
         "request": request,
-        "message": ""
+        "room_map": room_map,
+        "message": "",
+        "current_date": today
     })
 
 @router.post("/book", response_class=HTMLResponse)

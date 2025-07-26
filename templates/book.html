@@ -41,7 +41,7 @@
       <input type="text" id="name" name="name" required>
 
       <label for="date">Date:</label>
-      <input type="date" id="date" name="date" required>
+      <input type="date" id="date" name="date_str" min="{{ current_date }}" required>
 
       <label for="start_time">From:</label>
       <input type="time" id="start_time" name="start_time" required>
@@ -52,18 +52,13 @@
       <button type="submit">Book Room</button>
     </form>
 
-    {% if msg %}
-      <p class="message {% if '✅' in msg %}success{% else %}error{% endif %}">{{ msg }}</p>
+    {% if message %}
+      <p class="message {% if '✅' in message %}success{% else %}error{% endif %}">
+        {{ message }}
+      </p>
     {% endif %}
 
     <a href="/history">View Booking History</a>
-
-    
-
-    {% if message %}
-      <p style="color: red; font-weight: bold;">{{ message }}</p>
-    {% endif %}
-
   </div>
 
   <!-- Auto-close time pickers -->
