@@ -31,47 +31,67 @@ def book_room(
     request: Request = None,
     db: Session = Depends(get_db)
 ):
-    user_id = request.cookies.get("user_id")
-    if not user_id:
-        return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
+    try:
+        user_id = request.cookies.get("user_id")
+        if not user_id:
+            return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
 
-    # Check past date/time
-    current_datetime = datetime.now()
-    booking_datetime = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
-    if booking_datetime < current_datetime:
+        # Check for past date/time
+        current_datetime = datetime.now()
+        booking_datetime = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+        if booking_datetime < current_datetime:
+            bookings = db.query(Booking).join(User).all()
+            room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
+            return templates.TemplateResponse("book.html", {
+                "request": request,
+                "msg": "⚠️ You cannot book a room for a past date or time.",
+                "room_map": room_map
+            })
+
+        # Find available rooms
+        booked_rooms = db.query(Booking.room_number).filter(
+            Booking.date == date,
+            Booking.start_time < end_time,
+            Booking.end_time > start_time
+        ).all()
+
+        booked = {room[0] for room in booked_rooms}
+        available_rooms = [i for i in range(1, 11) if i not in booked]
+
+        if not available_rooms:
+            bookings = db.query(Booking).join(User).all()
+            room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
+            return templates.TemplateResponse("book.html", {
+                "request": request,
+                "msg": "❌ No rooms available for the selected date/time.",
+                "room_map": room_map
+            })
+
+        # Create new booking
+        new_booking = Booking(
+            user_id=int(user_id),
+            room_number=available_rooms[0],
+            date=date,
+            start_time=start_time,
+            end_time=end_time,
+            name=name
+        )
+        db.add(new_booking)
+        db.commit()
+
+        # ✅ Redirect to booking history
+        return RedirectResponse("/history", status_code=status.HTTP_302_FOUND)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        bookings = db.query(Booking).join(User).all()
+        room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "msg": "⚠️ You cannot book room for a past date or time.",
-            "room_map": []
+            "msg": "❌ Internal server error occurred.",
+            "room_map": room_map
         })
-
-    booked_rooms = db.query(Booking.room_number).filter(
-        Booking.date == date,
-        Booking.start_time < end_time,
-        Booking.end_time > start_time
-    ).all()
-
-    booked = {room[0] for room in booked_rooms}
-    available_rooms = [i for i in range(1, 11) if i not in booked]
-
-    if not available_rooms:
-        return templates.TemplateResponse("book.html", {
-            "request": request,
-            "msg": "❌ No rooms available for the selected date/time.",
-            "room_map": []
-        })
-
-    new_booking = Booking(
-        user_id=int(user_id),
-        room_number=available_rooms[0],
-        date=date,
-        start_time=start_time,
-        end_time=end_time,
-        name=name
-    )
-    db.add(new_booking)
-    db.commit()
-    return RedirectResponse("/history", status_code=status.HTTP_302_FOUND)
 
 
 @router.get("/history", response_class=HTMLResponse)
@@ -81,4 +101,7 @@ def booking_history(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
 
     bookings = db.query(Booking).filter(Booking.user_id == int(user_id)).all()
-    return templates.TemplateResponse("history.html", {"request": request, "bookings": bookings})
+    return templates.TemplateResponse("history.html", {
+        "request": request,
+        "bookings": bookings
+    })
