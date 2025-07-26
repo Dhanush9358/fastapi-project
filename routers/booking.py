@@ -54,13 +54,23 @@ def book_room(
             "room_map": room_map
         })
     
-    if booking_date == today and start < current_time:
+    booking_start_datetime = datetime.combine(booking_date, start)
+    if booking_start_datetime < datetime.now():
         return templates.TemplateResponse("book.html", {
-            "request": request,
-            "message": "❌ Cannot book a past time slot for today.",
-            "current_date": today.isoformat(),
-            "room_map": room_map
-        })
+        "request": request,
+        "message": "❌ Cannot book for a past date/time.",
+        "current_date": today.isoformat(),
+        "room_map": room_map
+    })
+
+    
+    # if booking_date == today and start < current_time:
+    #     return templates.TemplateResponse("book.html", {
+    #         "request": request,
+    #         "message": "❌ Cannot book a past time slot for today.",
+    #         "current_date": today.isoformat(),
+    #         "room_map": room_map
+    #     })
 
     if end <= start:
         return templates.TemplateResponse("book.html", {
