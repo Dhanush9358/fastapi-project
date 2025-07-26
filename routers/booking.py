@@ -37,8 +37,9 @@ def book_room(
     booking_date = date.fromisoformat(date_str)
     today = date.today()
 
-    start = datetime.combine(booking_date, time.fromisoformat(start_time))
-    end = datetime.combine(booking_date, time.fromisoformat(end_time))
+    # Convert string times to time objects
+    start = time.fromisoformat(start_time)
+    end = time.fromisoformat(end_time)
 
     # get latest booking map
     bookings = db.query(Booking).join(User).all()
@@ -101,6 +102,7 @@ def book_room(
         "current_date": today.isoformat(),
         "room_map": room_map
     })
+
 
 
 @router.get("/history", response_class=HTMLResponse)
