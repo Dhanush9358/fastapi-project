@@ -25,65 +25,71 @@ def book_form(request: Request, db: Session = Depends(get_db)):
 def book_room(
     request: Request,
     name: str = Form(...),
-    date_str: str = Form(...),
+    date: str = Form(...),
     start_time: str = Form(...),
     end_time: str = Form(...),
     db: Session = Depends(get_db),
 ):
     user_id = request.cookies.get("user_id")
     if not user_id:
-        return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
-    booking_date = date.fromisoformat(date_str)
+    booking_date = date.fromisoformat(date)
     today = date.today()
+
     if booking_date < today:
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "message": "❌ You cannot book a room for a past date."
+            "message": "❌ You cannot book a room for a past date.",
+            "current_date": today.isoformat()
         })
 
-    start_datetime = datetime.combine(booking_date, time.fromisoformat(start_time))
-    end_datetime = datetime.combine(booking_date, time.fromisoformat(end_time))
+    start = datetime.combine(booking_date, time.fromisoformat(start_time))
+    end = datetime.combine(booking_date, time.fromisoformat(end_time))
 
-    if end_datetime <= start_datetime:
+    if end <= start:
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "message": "❌ End time must be after start time."
+            "message": "❌ End time must be after start time.",
+            "current_date": today.isoformat()
         })
 
-    # Check for available room (1 to 10)
+    # Check room availability (1 to 10)
     available_room = None
     for room_id in range(1, 11):
-        overlapping = db.query(Booking).filter(
+        conflict = db.query(Booking).filter(
             Booking.date == booking_date,
             Booking.room_id == room_id,
-            Booking.start_time < end_datetime,
-            Booking.end_time > start_datetime
+            Booking.start_time < end,
+            Booking.end_time > start
         ).first()
-        if not overlapping:
+        if not conflict:
             available_room = room_id
             break
 
     if not available_room:
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "message": "❌ No rooms available for the selected date and time."
+            "message": "❌ No rooms available for the selected time.",
+            "current_date": today.isoformat()
         })
 
+    # Book the room
     new_booking = Booking(
         name=name,
         user_id=int(user_id),
         room_id=available_room,
         date=booking_date,
-        start_time=start_datetime,
-        end_time=end_datetime
+        start_time=start,
+        end_time=end
     )
     db.add(new_booking)
     db.commit()
 
     return templates.TemplateResponse("book.html", {
         "request": request,
-        "message": f"✅ Room {available_room} successfully booked."
+        "message": f"✅ Room {available_room} successfully booked!",
+        "current_date": today.isoformat()
     })
 
 @router.get("/history", response_class=HTMLResponse)
