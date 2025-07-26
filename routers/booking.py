@@ -41,7 +41,7 @@ def book_room(
     if booking_datetime < current_datetime:
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "msg": "You cannot book room for a past date or time.",
+            "msg": "⚠️ You cannot book room for a past date or time.",
             "room_map": []
         })
 
@@ -57,7 +57,7 @@ def book_room(
     if not available_rooms:
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "msg": "No rooms available for the selected date/time.",
+            "msg": "❌ No rooms available for the selected date/time.",
             "room_map": []
         })
 
@@ -71,11 +71,8 @@ def book_room(
     )
     db.add(new_booking)
     db.commit()
-    return templates.TemplateResponse("book.html", {
-        "request": request,
-        "msg": f"Room {available_rooms[0]} booked successfully!",
-        "room_map": []
-    })
+    return RedirectResponse("/history", status_code=status.HTTP_302_FOUND)
+
 
 @router.get("/history", response_class=HTMLResponse)
 def booking_history(request: Request, db: Session = Depends(get_db)):
