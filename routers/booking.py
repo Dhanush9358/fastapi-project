@@ -25,7 +25,7 @@ def book_form(request: Request, db: Session = Depends(get_db)):
 def book_room(
     request: Request,
     name: str = Form(...),
-    date: str = Form(...),
+    date_str: str = Form(...),
     start_time: str = Form(...),
     end_time: str = Form(...),
     db: Session = Depends(get_db),
