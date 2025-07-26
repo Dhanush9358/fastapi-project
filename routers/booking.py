@@ -34,7 +34,7 @@ def book_room(
     if not user_id:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
-    booking_date = date.fromisoformat(date)
+    booking_date = date.fromisoformat(date_str)
     today = date.today()
 
     if booking_date < today:
