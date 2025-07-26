@@ -12,6 +12,19 @@
       text-decoration: none;
       font-weight: bold;
     }
+
+    .message {
+      font-weight: bold;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .message.success {
+      color: green;
+    }
+    .message.error {
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -22,7 +35,7 @@
 
   <div class="container">
     <h2>Make a Room Reservation</h2>
-    
+
     <form method="POST" action="/book" class="form-styled">
       <label for="name">Name:</label>
       <input type="text" id="name" name="name" required>
@@ -39,8 +52,22 @@
       <button type="submit">Book Room</button>
     </form>
 
-    <p>{{ msg }}</p>
+    {% if msg %}
+      <p class="message {% if '✅' in msg %}success{% else %}error{% endif %}">{{ msg }}</p>
+    {% endif %}
+
     <a href="/history">View Booking History</a>
+
+    <h3>Current Bookings</h3>
+    {% if room_map %}
+      <ul>
+        {% for room in room_map %}
+          <li>Room {{ room[0] }} | {{ room[1] }} - {{ room[2] }} | User: {{ room[3] }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No rooms booked yet.</p>
+    {% endif %}
   </div>
 
   <!-- Auto-close time pickers -->
