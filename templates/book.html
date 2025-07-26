@@ -58,16 +58,12 @@
 
     <a href="/history">View Booking History</a>
 
-    <h3>Current Bookings</h3>
-    {% if room_map %}
-      <ul>
-        {% for room in room_map %}
-          <li>Room {{ room[0] }} | {{ room[1] }} - {{ room[2] }} | User: {{ room[3] }}</li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>No rooms booked yet.</p>
+    
+
+    {% if message %}
+      <p style="color: red; font-weight: bold;">{{ message }}</p>
     {% endif %}
+
   </div>
 
   <!-- Auto-close time pickers -->
