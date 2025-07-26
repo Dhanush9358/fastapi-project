@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import Booking, User
 from fastapi.templating import Jinja2Templates
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -37,7 +37,7 @@ def book_room(
     booking_date = date.fromisoformat(date_str)
     today = date.today()
     
-    now = datetime.now()
+
 
     # Convert string times to time objects
     start = time.fromisoformat(start_time)
@@ -59,7 +59,7 @@ def book_room(
         })
     
 
-    if booking_start_datetime <= now:
+    if booking_start_datetime <= datetime.now() + timedelta(minutes=1):
         return templates.TemplateResponse("book.html", {
             "request": request,
             "message": "❌ Cannot book for a past date/time.",
@@ -67,14 +67,6 @@ def book_room(
             "room_map": room_map
         })
 
-    
-    # if booking_date == today and start < current_time:
-    #     return templates.TemplateResponse("book.html", {
-    #         "request": request,
-    #         "message": "❌ Cannot book a past time slot for today.",
-    #         "current_date": today.isoformat(),
-    #         "room_map": room_map
-    #     })
 
     if end <= start:
         return templates.TemplateResponse("book.html", {
