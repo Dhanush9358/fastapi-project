@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Form, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Booking, User, get_current_user
+from models import Booking, User
 from fastapi.templating import Jinja2Templates
 from datetime import datetime, date, time
 
@@ -29,7 +29,6 @@ def book_room(
     start_time: str = Form(...),
     end_time: str = Form(...),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
 ):
     try:
         booking_date = date.fromisoformat(date_str)
