@@ -37,24 +37,29 @@ def book_room(
     booking_date = date.fromisoformat(date_str)
     today = date.today()
 
+    start = datetime.combine(booking_date, time.fromisoformat(start_time))
+    end = datetime.combine(booking_date, time.fromisoformat(end_time))
+
+    # get latest booking map
+    bookings = db.query(Booking).join(User).all()
+    room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
+
     if booking_date < today:
         return templates.TemplateResponse("book.html", {
             "request": request,
             "message": "❌ You cannot book a room for a past date.",
-            "current_date": today.isoformat()
+            "current_date": today.isoformat(),
+            "room_map": room_map
         })
-
-    start = datetime.combine(booking_date, time.fromisoformat(start_time))
-    end = datetime.combine(booking_date, time.fromisoformat(end_time))
 
     if end <= start:
         return templates.TemplateResponse("book.html", {
             "request": request,
             "message": "❌ End time must be after start time.",
-            "current_date": today.isoformat()
+            "current_date": today.isoformat(),
+            "room_map": room_map
         })
 
-    # Check room availability (1 to 10)
     available_room = None
     for room_id in range(1, 11):
         conflict = db.query(Booking).filter(
@@ -71,10 +76,10 @@ def book_room(
         return templates.TemplateResponse("book.html", {
             "request": request,
             "message": "❌ No rooms available for the selected time.",
-            "current_date": today.isoformat()
+            "current_date": today.isoformat(),
+            "room_map": room_map
         })
 
-    # Book the room
     new_booking = Booking(
         name=name,
         user_id=int(user_id),
@@ -86,11 +91,17 @@ def book_room(
     db.add(new_booking)
     db.commit()
 
+    # refresh room_map after booking
+    bookings = db.query(Booking).join(User).all()
+    room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
+
     return templates.TemplateResponse("book.html", {
         "request": request,
         "message": f"✅ Room {available_room} successfully booked!",
-        "current_date": today.isoformat()
+        "current_date": today.isoformat(),
+        "room_map": room_map
     })
+
 
 @router.get("/history", response_class=HTMLResponse)
 def booking_history(request: Request, db: Session = Depends(get_db)):
