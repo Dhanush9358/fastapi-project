@@ -36,6 +36,7 @@ def book_room(
 
     booking_date = date.fromisoformat(date_str)
     today = date.today()
+    current_time = datetime.now().time()
 
     # Convert string times to time objects
     start = time.fromisoformat(start_time)
@@ -52,6 +53,14 @@ def book_room(
             "current_date": today.isoformat(),
             "room_map": room_map
         })
+    
+    if booking_date == today and start < current_time:
+        return templates.TemplateResponse("book.html", {
+            "request": request,
+            "message": "❌ Cannot book a past time slot for today.",
+            "current_date": today.isoformat(),
+            "room_map": room_map
+        })
 
     if end <= start:
         return templates.TemplateResponse("book.html", {
@@ -60,6 +69,8 @@ def book_room(
             "current_date": today.isoformat(),
             "room_map": room_map
         })
+    
+
 
     available_room = None
     for room_number in range(1, 11):
