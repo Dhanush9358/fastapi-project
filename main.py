@@ -17,9 +17,6 @@ templates = Jinja2Templates(directory="templates")
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/test-db")
-def test_db(db: Session = Depends(get_db)):
-    return {"status": "Connected to PostgreSQL"}
 
 app.include_router(auth_router)
 app.include_router(user.router)
