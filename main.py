@@ -1,15 +1,13 @@
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from database import Base, engine, get_db
-from auth import router as auth_router
+from database import Base, engine
 from routers import booking, user
-from models import User, Booking
-from sqlalchemy.orm import Session
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
@@ -18,6 +16,5 @@ def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-app.include_router(auth_router)
 app.include_router(user.router)
 app.include_router(booking.router)

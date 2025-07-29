@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Request, Form, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from datetime import datetime, date, time, timedelta
+
 from database import get_db
 from models import Booking, User
-from fastapi.templating import Jinja2Templates
-from datetime import datetime, date, time, timedelta
+
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -36,7 +38,6 @@ def book_room(
 
     booking_date = date.fromisoformat(date_str)
     today = date.today()
-    
 
 
     # Convert string times to time objects
@@ -44,7 +45,6 @@ def book_room(
     end = time.fromisoformat(end_time)
 
     booking_start_datetime = datetime.combine(booking_date, start)
-    # booking_end_datetime = datetime.combine(booking_date, end)
 
     # get latest booking map
     bookings = db.query(Booking).join(User).all()
@@ -134,14 +134,4 @@ def booking_history(request: Request, db: Session = Depends(get_db)):
         "bookings": bookings
     })
 
-
-# @router.get("/book", response_class=HTMLResponse)
-# def book_form(request: Request, db: Session = Depends(get_db)):
-#     bookings = db.query(Booking).join(User).all()
-#     room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
-#     return templates.TemplateResponse("book.html", {
-#         "request": request,
-#         "room_map": room_map,
-#         "msg": ""
-#     })
 

@@ -1,35 +1,87 @@
-/* General body styling */
+/* Body Styling */
 body {
   font-family: Arial, sans-serif;
   background: #f4f4f4;
   padding: 2em;
   margin: 0;
+  text-align: center;
 }
 
-/* Centered container box */
+/* Centered Container */
 .container {
-  max-width: 400px;
+  max-width: 450px;
   margin: auto;
   background-color: white;
   padding: 2em;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: left;
 }
 
-/* Heading style */
-.container h2 {
+.container h2,
+h1 {
   text-align: center;
   margin-bottom: 1.5em;
+  color: #333;
 }
 
-/* Form layout */
+/* Form Styling */
+form,
 form.form-styled {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 15px;
 }
 
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="time"] {
+  width: 100%;
+  height: 45px;
+  padding: 8px 12px;
+  font-size: 16px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* Input & Button Focus Styles (Accessibility) */
+input:focus,
+button:focus {
+  outline: 2px solid #0052cc;
+  box-shadow: 0 0 3px #0052cc;
+}
+
+/* Buttons */
+button,
+.btn {
+  height: 45px;
+  font-size: 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 0 20px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+button:hover,
+.btn:hover {
+  background-color: #555;
+}
+
+/* Logout Link */
 .logout-link {
   position: fixed;
   top: 10px;
@@ -41,51 +93,13 @@ form.form-styled {
   z-index: 999;
 }
 
-
 .logout-link:hover {
   background-color: #d32f2f;
 }
 
-
-
-/* Label styling */
-form.form-styled label {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-/* Input box uniform style */
-form.form-styled input[type="text"],
-form.form-styled input[type="date"],
-form.form-styled input[type="time"] {
-  width: 100%;
-  height: 45px;
-  padding: 8px 12px;
-  font-size: 16px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-/* Submit button styling */
-form.form-styled button {
-  height: 45px;
-  font-size: 16px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  align-self: center;
-}
-
-form.form-styled button:hover {
-  background-color: #555;
-}
-
-/* Link below the form */
-a {
+/* Generic Link */
+a,
+.back-link {
   display: block;
   text-align: center;
   margin-top: 1.5em;
@@ -94,6 +108,141 @@ a {
   font-weight: bold;
 }
 
-a:hover {
+a:hover,
+.back-link:hover {
   text-decoration: underline;
+}
+
+/* Message Boxes */
+.message {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #f4f4f4;
+}
+
+.message.success {
+  color: green;
+  background-color: #e6ffe6;
+}
+
+.message.error {
+  color: red;
+  background-color: #ffe6e6;
+}
+
+/* Optional hidden class for JS toggling */
+.hidden {
+  display: none;
+}
+
+/* Links Section */
+.links {
+  text-align: center;
+  margin-top: 1.5em;
+}
+
+.links a {
+  display: block;
+  margin-top: 0.5em;
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+/* Booking History */
+.history-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.history-container li {
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  line-height: 1.5;
+}
+
+/* Forgot Page Specific */
+.credentials {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+}
+
+.credentials pre {
+  background-color: #eee;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  font-family: Consolas, monospace;
+  margin: 5px 0 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Booking list styles */
+.booking-list {
+  list-style: none;
+  padding: 0;
+}
+
+.booking-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  line-height: 1.5;
+}
+
+/* Home/index page styling */
+.centered-page {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  text-align: center;
+  padding: 3em;
+}
+
+.centered-page h1 {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 1em;
+}
+
+.btn {
+  display: inline-block;
+  margin: 1em;
+  padding: 1em 2em;
+  background-color: #333;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 18px;
+  transition: background-color 0.3s;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+  .container,
+  .history-container {
+    padding: 1em;
+    border-radius: 6px;
+  }
+
+  input,
+  button {
+    font-size: 15px;
+    height: 40px;
+  }
+
+  .btn {
+    padding: 0.8em 1.5em;
+    font-size: 16px;
+  }
 }
