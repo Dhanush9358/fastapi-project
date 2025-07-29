@@ -9,8 +9,42 @@ __pycache__/
 !auth.py
 !database.py
 !models.py
-!schemas.py
+!schemas.py# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# IDEs/editors
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+
+# Byte-compiled / cache files
+*.pyc
+*.pyd
+*.pdb
+*.pyo
+
+# Database (SQLite) — ignore if you're switching fully to PostgreSQL
+data.db
+
+# Optional: Logs or temp files
+*.log
+*.tmp
+
 !requirements.txt
 !routers/
 !templates/
 !static/
+.env
