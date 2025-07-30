@@ -62,19 +62,21 @@ button:focus {
 /* Buttons */
 button,
 .btn {
-  height: 45px;
-  font-size: 16px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  padding: 0 20px;
-  text-decoration: none;
   display: inline-block;
-  text-align: center;
+  margin: 1em;
+  padding: 8px 20px;
+  background-color: #222;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: normal;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
+
+
 
 button:hover,
 .btn:hover {
@@ -93,9 +95,6 @@ button:hover,
   z-index: 999;
 }
 
-/* .logout-link:hover {
-  background-color: #d32f2f;
-} */
 
 /* Generic Link */
 a,
