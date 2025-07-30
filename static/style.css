@@ -93,9 +93,9 @@ button:hover,
   z-index: 999;
 }
 
-.logout-link:hover {
+/* .logout-link:hover {
   background-color: #d32f2f;
-}
+} */
 
 /* Generic Link */
 a,
@@ -218,14 +218,17 @@ a:hover,
 .btn {
   display: inline-block;
   margin: 1em;
-  padding: 1em 2em;
-  background-color: #333;
-  color: #fff;
+  padding: 12px 28px;
+  background-color: #222;
+  color: white;
   text-decoration: none;
   border-radius: 10px;
-  font-size: 18px;
-  transition: background-color 0.3s;
+  font-size: 17px;
+  font-weight: normal;
+  transition: background-color 0.3s ease;
+  box-shadow: none;
 }
+
 
 /* Responsive Adjustments */
 @media (max-width: 480px) {
