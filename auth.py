@@ -2,7 +2,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 from models import User
 from database import get_db
@@ -44,13 +44,17 @@ def decode_access_token(token: str):
 # OAuth2 JWT dependency for securing routes
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    
+def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("sub")
-        if user_id is None:
+        username = payload.get("sub")
+        if not username:
             raise HTTPException(status_code=401, detail="Invalid token")
-        user = db.query(User).filter(User.id == int(user_id)).first()
+        user = db.query(User).filter(User.username == username).first()
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
         return user
