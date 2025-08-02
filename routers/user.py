@@ -7,6 +7,7 @@ from pydantic import EmailStr
 from models import User
 from database import get_db
 from auth import hash_password, verify_password, create_access_token, decode_access_token
+from datetime import timedelta
 from dotenv import load_dotenv
 import os
 
@@ -99,22 +100,39 @@ async def forgot_post(
 ):
     user = db.query(User).filter(User.email == email, User.security_key == secret).first()
     if not user:
-        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Invalid email or security key"})
+        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "❌ Invalid email or security key"})
 
-    reset_token = create_access_token({"sub": user.username}, expires_delta=None)
+    # Token valid for 1 hour
+    reset_token = create_access_token({"sub": user.username}, expires_delta=timedelta(hours=1))
     reset_link = f"{request.base_url}reset-password?token={reset_token}"
 
+    body = f"""
+Hello {user.username},
+
+We received a request to recover your account credentials.
+
+🧑 Username: {user.username}
+
+🔑 To reset your password, click the link below:
+{reset_link}
+
+This link will expire in 1 hour.
+
+If you didn't request this, just ignore this email.
+"""
+
     message = MessageSchema(
-        subject="🔐 Reset Your Password",
+        subject="🔐 Your Account Recovery Details",
         recipients=[email],
-        body=f"Hello {user.username},\n\nClick the link below to reset your password:\n\n{reset_link}\n\nThis link will expire in 1 hour.\n\nIf you didn’t request this, just ignore this email.",
+        body=body,
         subtype="plain"
     )
 
     fm = FastMail(conf)
     await fm.send_message(message)
 
-    return templates.TemplateResponse("forgot.html", {"request": request, "msg": "📧 Reset link sent to your email!"})
+    return templates.TemplateResponse("forgot.html", {"request": request, "msg": "📧 Username and reset link sent to your email!"})
+
 
 # ------------------- Password Reset via Token -------------------
 @router.get("/reset-password")

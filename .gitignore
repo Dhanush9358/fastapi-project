@@ -1,25 +1,16 @@
-# Ignore Python cache and environment
-__pycache__/
-*.__pycache__.venv/
-
-# But NOT these:
-!.gitignore
-!data.db
-!main.py
-!auth.py
-!database.py
-!models.py
-!schemas.py# Python cache
+# Python bytecode
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+*.pdb
 
 # Virtual environments
 .venv/
 env/
 venv/
 
-# IDEs/editors
+# IDE/editor config
 .vscode/
 .idea/
 
@@ -30,21 +21,20 @@ Thumbs.db
 # Environment variables
 .env
 
-# Byte-compiled / cache files
-*.pyc
-*.pyd
-*.pdb
-*.pyo
-
-# Database (SQLite) — ignore if you're switching fully to PostgreSQL
+# Local SQLite DB (not needed on cloud PostgreSQL)
 data.db
 
-# Optional: Logs or temp files
+# Logs or temp files
 *.log
 *.tmp
 
+# Allow only project-critical files
+!main.py
+!auth.py
+!database.py
+!models.py
+!schemas.py
 !requirements.txt
 !routers/
 !templates/
 !static/
-.env

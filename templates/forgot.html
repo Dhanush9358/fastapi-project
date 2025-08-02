@@ -15,14 +15,6 @@
       <button type="submit">Recover</button>
     </form>
 
-    {% if username %}
-      <div class="credentials">
-        <p><strong>Username:</strong> {{ username }}</p>
-        <p><strong>Password Reset:</strong></p>
-        <p>Please contact the website owner to reset your password.</p>
-      </div>
-    {% endif %}
-
     {% if msg %}
       <div class="msg">{{ msg }}</div>
     {% endif %}
