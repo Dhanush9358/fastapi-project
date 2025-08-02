@@ -6,13 +6,17 @@ from datetime import datetime, date, time, timedelta
 
 from database import get_db
 from models import Booking, User
-
+from auth import get_current_user  # ✅ make sure this exists in auth.py
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 @router.get("/book", response_class=HTMLResponse)
-def book_form(request: Request, db: Session = Depends(get_db)):
+def book_form(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     today = date.today().isoformat()
     bookings = db.query(Booking).join(User).all()
     room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
@@ -31,22 +35,14 @@ def book_room(
     start_time: str = Form(...),
     end_time: str = Form(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    user_id = request.cookies.get("user_id")
-    if not user_id:
-        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
-
-    booking_date = date.fromisoformat(date_str)
     today = date.today()
-
-
-    # Convert string times to time objects
+    booking_date = date.fromisoformat(date_str)
     start = time.fromisoformat(start_time)
     end = time.fromisoformat(end_time)
-
     booking_start_datetime = datetime.combine(booking_date, start)
 
-    # get latest booking map
     bookings = db.query(Booking).join(User).all()
     room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
 
@@ -57,7 +53,6 @@ def book_room(
             "current_date": today.isoformat(),
             "room_map": room_map
         })
-    
 
     if booking_start_datetime <= datetime.now() + timedelta(minutes=1):
         return templates.TemplateResponse("book.html", {
@@ -67,7 +62,6 @@ def book_room(
             "room_map": room_map
         })
 
-
     if end <= start:
         return templates.TemplateResponse("book.html", {
             "request": request,
@@ -75,8 +69,6 @@ def book_room(
             "current_date": today.isoformat(),
             "room_map": room_map
         })
-    
-
 
     available_room = None
     for room_number in range(1, 11):
@@ -100,7 +92,7 @@ def book_room(
 
     new_booking = Booking(
         name=name,
-        user_id=int(user_id),
+        user_id=current_user.id,  # ✅ use JWT-authenticated user
         room_number=available_room,
         date=booking_date,
         start_time=start,
@@ -109,7 +101,6 @@ def book_room(
     db.add(new_booking)
     db.commit()
 
-    # refresh room_map after booking
     bookings = db.query(Booking).join(User).all()
     room_map = [(b.room_number, b.start_time, b.end_time, b.user.username) for b in bookings]
 
@@ -120,18 +111,14 @@ def book_room(
         "room_map": room_map
     })
 
-
-
 @router.get("/history", response_class=HTMLResponse)
-def booking_history(request: Request, db: Session = Depends(get_db)):
-    user_id = request.cookies.get("user_id")
-    if not user_id:
-        return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-
-    bookings = db.query(Booking).filter(Booking.user_id == int(user_id)).all()
+def booking_history(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    bookings = db.query(Booking).filter(Booking.user_id == current_user.id).all()
     return templates.TemplateResponse("history.html", {
         "request": request,
         "bookings": bookings
     })
-
-

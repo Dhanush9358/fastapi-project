@@ -8,3 +8,5 @@ python-multipart
 python-jose
 psycopg2-binary
 python-dotenv
+fastapi-mail
+email-validator

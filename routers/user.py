@@ -1,14 +1,33 @@
 from fastapi import APIRouter, Request, Form, Depends, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from pydantic import EmailStr
 from models import User
 from database import get_db
-from auth import hash_password, verify_password
+from auth import hash_password, verify_password, create_access_token, decode_access_token
+from dotenv import load_dotenv
+import os
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
+load_dotenv("/etc/secrets/.env") if os.path.exists("/etc/secrets/.env") else load_dotenv()
+
+# Configure FastAPI-Mail
+conf = ConnectionConfig(
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+    MAIL_FROM=os.getenv("MAIL_FROM"),
+    MAIL_PORT=587,
+    MAIL_SERVER="smtp.gmail.com",
+    MAIL_TLS=True,
+    MAIL_SSL=False,
+    USE_CREDENTIALS=True
+)
+
+# ------------------- Register -------------------
 @router.get("/register")
 def register_get(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
@@ -17,39 +36,28 @@ def register_get(request: Request):
 def register_post(
     request: Request,
     username: str = Form(...),
-    email: str = Form(...),
+    email: EmailStr = Form(...),
     password: str = Form(...),
     security_key: str = Form(...),
     db: Session = Depends(get_db)
 ):
     if not email.endswith("@gmail.com"):
         return templates.TemplateResponse("register.html", {"request": request, "msg": "Email must end with @gmail.com"})
-    if len(password) < 8:
-        return templates.TemplateResponse("register.html", {"request": request, "msg": "Password must be at least 8 characters"})
-    if len(security_key) < 4:
-        return templates.TemplateResponse("register.html", {"request": request, "msg": "Security key must be at least 4 characters"})
 
-    existing_user = db.query(User).filter(
-        (User.username == username) | (User.email == email)
-    ).first()
+    if db.query(User).filter((User.username == username) | (User.email == email)).first():
+        return templates.TemplateResponse("register.html", {"request": request, "msg": "Username or email already exists"})
 
-    if existing_user:
-        return templates.TemplateResponse("register.html", {
-            "request": request,
-            "msg": "Username or Email already exists"
-        })
-
-    hashed_pw = hash_password(password)
-    new_user = User(
+    user = User(
         username=username,
         email=email,
-        password=hashed_pw,
+        password=hash_password(password),
         security_key=security_key
     )
-    db.add(new_user)
+    db.add(user)
     db.commit()
     return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
 
+# ------------------- Login -------------------
 @router.get("/login")
 def login_get(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -64,28 +72,71 @@ def login_post(
     user = db.query(User).filter(User.username == username).first()
     if not user or not verify_password(password, user.password):
         return templates.TemplateResponse("login.html", {"request": request, "msg": "Invalid username or password"})
-    resp = RedirectResponse("/book", status_code=status.HTTP_302_FOUND)
-    resp.set_cookie("user_id", str(user.id))
-    return resp
 
-@router.get("/forgot")
+    token = create_access_token({"sub": user.username})
+    response = RedirectResponse("/book", status_code=status.HTTP_302_FOUND)
+    response.set_cookie("access_token", token, httponly=True)
+    return response
+
+# ------------------- Logout -------------------
+@router.get("/logout")
+def logout(request: Request):
+    response = RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
+    response.delete_cookie("access_token")
+    return response
+
+# ------------------- Forgot Password / Username -------------------
+@router.get("/forgot", response_class=HTMLResponse)
 def forgot_get(request: Request):
     return templates.TemplateResponse("forgot.html", {"request": request})
 
-@router.post("/forgot")
-def forgot_post(
+@router.post("/forgot", response_class=HTMLResponse)
+async def forgot_post(
     request: Request,
-    email: str = Form(...),
+    email: EmailStr = Form(...),
     secret: str = Form(...),
     db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.email == email, User.security_key == secret).first()
-    if user:
-        return templates.TemplateResponse("forgot.html", {"request": request, "username": user.username, "password": user.password})
-    return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Invalid email or security key"})
+    if not user:
+        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Invalid email or security key"})
 
-@router.get("/logout")
-def logout(request: Request):
-    resp = RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
-    resp.delete_cookie("user_id")
-    return resp
+    reset_token = create_access_token({"sub": user.username}, expires_delta=None)
+    reset_link = f"{request.base_url}reset-password?token={reset_token}"
+
+    message = MessageSchema(
+        subject="🔐 Reset Your Password",
+        recipients=[email],
+        body=f"Hello {user.username},\n\nClick the link below to reset your password:\n\n{reset_link}\n\nThis link will expire in 1 hour.\n\nIf you didn’t request this, just ignore this email.",
+        subtype="plain"
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+    return templates.TemplateResponse("forgot.html", {"request": request, "msg": "📧 Reset link sent to your email!"})
+
+# ------------------- Password Reset via Token -------------------
+@router.get("/reset-password")
+def reset_password_form(request: Request, token: str):
+    return templates.TemplateResponse("reset_password.html", {"request": request, "token": token})
+
+@router.post("/reset-password")
+def reset_password_submit(
+    request: Request,
+    token: str = Form(...),
+    new_password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    payload = decode_access_token(token)
+    if not payload:
+        return templates.TemplateResponse("reset_password.html", {"request": request, "token": token, "msg": "Invalid or expired token"})
+
+    username = payload.get("sub")
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return templates.TemplateResponse("reset_password.html", {"request": request, "token": token, "msg": "User not found"})
+
+    user.password = hash_password(new_password)
+    db.commit()
+    return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
