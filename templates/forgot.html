@@ -11,12 +11,11 @@
     
     <form method="post" class="form-styled">
       <input type="email" name="email" placeholder="Enter your Email" required>
-      <input type="text" name="secret" placeholder="Enter your Security Key" required>
       <button type="submit">Recover</button>
     </form>
 
     {% if msg %}
-      <div class="msg">{{ msg }}</div>
+      <div class="error-message">{{ msg }}</div>
     {% endif %}
 
     <a href="/login" class="back-link">← Back to Login</a>

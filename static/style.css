@@ -148,6 +148,14 @@ a:hover,
   background-color: #ffe6e6;
 }
 
+.error-message {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+}
+
+
 /* Optional hidden class for JS toggling */
 .hidden {
   display: none;

@@ -97,10 +97,9 @@ def forgot_get(request: Request):
 async def forgot_post(
     request: Request,
     email: EmailStr = Form(...),
-    secret: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.email == email, User.security_key == secret).first()
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         return templates.TemplateResponse("forgot.html", {"request": request, "msg": "❌ Invalid email or security key"})
 
