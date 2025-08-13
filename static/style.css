@@ -140,7 +140,7 @@ a:hover,
 
 .message.success {
   color: green;
-  background-color: #e6ffe6;
+  /* background-color: #e6ffe6; */
 }
 
 .message.error {
