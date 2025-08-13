@@ -101,14 +101,14 @@ async def forgot_post(
 ):
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "❌ Invalid email or security key"})
+        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "❌ Invalid email"})
 
     # Token valid for 1 hour
-    reset_token = create_access_token({"sub": user.username}, expires_delta=timedelta(hours=1))
+    reset_token = create_access_token({"sub": user.username}, expires_delta=timedelta(minutes=15))
     reset_link = f"{request.base_url}reset-password?token={reset_token}"
 
     body = f"""
-Hello {user.username},
+Hello User,
 
 We received a request to recover your account credentials.
 
@@ -117,7 +117,7 @@ We received a request to recover your account credentials.
 🔑 To reset your password, click the link below:
 {reset_link}
 
-This link will expire in 1 hour.
+This link will expire in 15 minutes.
 
 If you didn't request this, just ignore this email.
 """
@@ -147,14 +147,29 @@ def reset_password_submit(
     new_password: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    payload = decode_access_token(token)
-    if not payload:
-        return templates.TemplateResponse("reset_password.html", {"request": request, "token": token, "msg": "Invalid or expired token"})
+    payload, error = decode_access_token(token)
+
+    if error == "expired":
+        return templates.TemplateResponse("reset_password.html", {
+            "request": request,
+            "token": token,
+            "msg": "❌ Reset link has expired. Please request a new one."
+        })
+    elif error == "invalid":
+        return templates.TemplateResponse("reset_password.html", {
+            "request": request,
+            "token": token,
+            "msg": "❌ Invalid reset link."
+        })
 
     username = payload.get("sub")
     user = db.query(User).filter(User.username == username).first()
     if not user:
-        return templates.TemplateResponse("reset_password.html", {"request": request, "token": token, "msg": "User not found"})
+        return templates.TemplateResponse("reset_password.html", {
+            "request": request,
+            "token": token,
+            "msg": "❌ User not found"
+        })
 
     user.password = hash_password(new_password)
     db.commit()
