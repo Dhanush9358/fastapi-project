@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="admin-dashboard">
+    <h2>Admin Dashboard</h2>
+    <table class="availability-table">
+        <tr>
+            <th>User</th>
+            <th>Room</th>
+            <th>Date</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Actions</th>
+        </tr>
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.user }}</td>
+            <td>{{ booking.room }}</td>
+            <td>{{ booking.date }}</td>
+            <td>{{ booking.start }}</td>
+            <td>{{ booking.end }}</td>
+            <td>
+                <button class="btn-small edit-btn" data-id="{{ booking.id }}">Edit</button>
+                <button class="btn-small cancel-btn" data-id="{{ booking.id }}">Cancel</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<script>
+document.querySelectorAll('.cancel-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if(confirm('Cancel this booking?')) {
+            fetch(`/admin_cancel/${btn.dataset.id}`, {method: 'DELETE'})
+            .then(() => location.reload());
+        }
+    });
+});
+
+document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        window.location.href = `/admin_edit/${btn.dataset.id}`;
+    });
+});
+</script>
+{% endblock %}

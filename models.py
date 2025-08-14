@@ -9,7 +9,6 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
-    security_key = Column(String, nullable=False)
 
     bookings = relationship("Booking", back_populates="user")
 
