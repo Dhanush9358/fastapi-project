@@ -270,10 +270,3 @@ a:hover,
     font-size: 16px;
   }
 }
-
-.available {
-  color: green;
-}
-.booked {
-  color: red;
-}
