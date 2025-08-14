@@ -41,7 +41,6 @@ def register_post(
     username: str = Form(...),
     email: EmailStr = Form(...),
     password: str = Form(...),
-    security_key: str = Form(...),
     db: Session = Depends(get_db)
 ):
     if not email.endswith("@gmail.com"):
@@ -53,8 +52,7 @@ def register_post(
     user = User(
         username=username,
         email=email,
-        password=hash_password(password),
-        security_key=security_key
+        password=hash_password(password)
     )
     db.add(user)
     db.commit()
