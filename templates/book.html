@@ -44,7 +44,7 @@
             {% for day in availability %}
                 <tr>
                     <td>{{ day.date }}</td>
-                    <td style="color: {{ 'green' if day.available else 'red' }}">
+                    <td class="{{ 'available' if day.available else 'booked' }}">
                         {{ 'Available' if day.available else 'Booked' }}
                     </td>
                 </tr>
@@ -52,6 +52,11 @@
         </table>
     </div>
 </div>
+
+<style>
+.available { color: green; }
+.booked { color: red; }
+</style>
 
 <script>
 document.getElementById('recurrence').addEventListener('change', function() {

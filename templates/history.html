@@ -25,6 +25,8 @@
     }
     .edit-btn:hover { background-color: #45a049; }
     .cancel-btn:hover { background-color: #e53935; }
+    .available { color: green; }
+    .booked { color: red; }
   </style>
 </head>
 <body>
@@ -37,25 +39,41 @@
     <h2>Your Bookings</h2>
 
     {% if bookings %}
-      <ul class="booking-list">
+      <table class="booking-table">
+        <tr>
+          <th>Name</th>
+          <th>Room</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
         {% for booking in bookings %}
-          <li>
-            <strong>{{ booking.name }}</strong> booked Room {{ booking.room_number }}<br>
-            📅 {{ booking.date }} | ⏰ {{ booking.start_time }} to {{ booking.end_time }}
-
-            {% if booking.is_future %}
-              <div class="action-buttons">
-                <a href="/edit_booking/{{ booking.id }}">
-                  <button class="edit-btn">Edit</button>
-                </a>
-                <a href="/cancel_booking/{{ booking.id }}" onclick="return confirm('Are you sure you want to cancel this booking?');">
-                  <button class="cancel-btn">Cancel</button>
-                </a>
-              </div>
-            {% endif %}
-          </li>
+          <tr>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.room_number }}</td>
+            <td>{{ booking.date }}</td>
+            <td>{{ booking.start_time }} to {{ booking.end_time }}</td>
+            <td class="{{ 'available' if booking.available else 'booked' }}">
+              {{ 'Available' if booking.available else 'Booked' }}
+            </td>
+            <td>
+              {% if booking.is_future %}
+                <div class="action-buttons">
+                  <a href="/edit_booking/{{ booking.id }}">
+                    <button class="edit-btn">Edit</button>
+                  </a>
+                  <a href="/cancel_booking/{{ booking.id }}" onclick="return confirm('Are you sure you want to cancel this booking?');">
+                    <button class="cancel-btn">Cancel</button>
+                  </a>
+                </div>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
         {% endfor %}
-      </ul>
+      </table>
     {% else %}
       <p>No bookings found.</p>
     {% endif %}
