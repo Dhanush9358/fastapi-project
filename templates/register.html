@@ -18,9 +18,6 @@
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required>
 
-      <label for="security_key">Security Key (for recovery):</label>
-      <input type="text" id="security_key" name="security_key" required>
-
       <button type="submit">Register</button>
     </form>
 
@@ -37,7 +34,6 @@
     function validateForm() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
-      const key = document.getElementById("security_key").value;
 
       if (!email.endsWith("@gmail.com")) {
         alert("Email must end with @gmail.com");
@@ -46,11 +42,6 @@
 
       if (password.length < 8) {
         alert("Password must be at least 8 characters");
-        return false;
-      }
-
-      if (key.length < 4) {
-        alert("Security Key must be at least 4 characters");
         return false;
       }
 
