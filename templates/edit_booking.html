@@ -1,29 +1,30 @@
-{% extends "base.html" %}
-{% block title %}Edit Booking{% endblock %}
+<!-- edit_booking.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Booking</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
 
-{% block content %}
 <div class="container">
     <h2>Edit Booking</h2>
 
-    {% if error %}
-        <p class="error-message">{{ error }}</p>
-    {% endif %}
+    <form method="POST" action="/edit_booking/{{ booking.id }}">
+        <label>Date:</label>
+        <input type="date" name="date" value="{{ booking.date }}" required><br><br>
 
-    <form method="POST">
-        <label for="date">Date:</label>
-        <input type="date" id="date" name="new_date" value="{{ booking.date }}" required>
+        <label>Start Time:</label>
+        <input type="time" name="start_time" value="{{ booking.start_time }}" required><br><br>
 
-        <label for="start">Start Time:</label>
-        <input type="time" id="start" name="new_start" value="{{ booking.start_time }}" required>
+        <label>End Time:</label>
+        <input type="time" name="end_time" value="{{ booking.end_time }}" required><br><br>
 
-        <label for="end">End Time:</label>
-        <input type="time" id="end" name="new_end" value="{{ booking.end_time }}" required>
-
-        <p>Room Number: <strong>{{ booking.room_number }}</strong></p>
-
-        <button type="submit" class="btn">Update Booking</button>
+        <button type="submit">Update Booking</button>
     </form>
 
-    <a href="/history" class="back-link">Back to History</a>
+    <a href="/history">Back to History</a>
 </div>
-{% endblock %}
+
+</body>
+</html>
