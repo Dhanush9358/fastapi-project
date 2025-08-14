@@ -111,16 +111,16 @@ def book_room(
         "room_map": room_map
     })
 
-@router.get("/history", response_class=HTMLResponse)
-def booking_history(
-    request: Request,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    bookings = db.query(Booking).filter(Booking.user_id == current_user.id).all()
+@router.get("/history")
+def booking_history(request: Request, db: Session = Depends(get_db)):
+    user_id = get_current_user(request)  # your method to get logged-in user
+    bookings = db.query(Booking).filter(Booking.user_id == user_id).all()
+    today = date.today()  # get current date
+
     return templates.TemplateResponse("history.html", {
         "request": request,
-        "bookings": bookings
+        "bookings": bookings,
+        "current_date": today  # pass current_date to template
     })
 
 @router.get("/edit_booking/{booking_id}")
