@@ -1,28 +1,36 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Booking History</title>
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-
-  {% if request.cookies.access_token %}
-    <a href="/logout" class="logout-link">Logout</a>
-  {% endif %}
-
-  <div class="container">
+<div class="container">
     <h2>Your Bookings</h2>
-    <ul class="booking-list">
-      {% for booking in bookings %}
-        <li>
-          <strong>{{ booking.name }}</strong> booked Room {{ booking.room_number }}<br>
-          📅 {{ booking.date }} | ⏰ {{ booking.start_time }} to {{ booking.end_time }}
-        </li>
-      {% endfor %}
-    </ul>
+
+    {% if bookings %}
+    <table class="booking-table">
+        <tr>
+            <th>Name</th>
+            <th>Room</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Actions</th>
+        </tr>
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.room_number }}</td>
+            <td>{{ booking.date }}</td>
+            <td>{{ booking.start_time }} to {{ booking.end_time }}</td>
+            <td>
+                {% if booking.date >= current_date %}
+                    <a href="/edit_booking/{{ booking.id }}">
+                        <button class="edit-btn">Edit</button>
+                    </a>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No bookings found.</p>
+    {% endif %}
 
     <a href="/book" class="back-link">Book Another Room</a>
-  </div>
-
-</body>
-</html>
+</div>

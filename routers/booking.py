@@ -122,3 +122,60 @@ def booking_history(
         "request": request,
         "bookings": bookings
     })
+
+@router.get("/edit_booking/{booking_id}")
+def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        return RedirectResponse(url="/history")
+    
+    # Optional: Only allow editing future bookings
+    if booking.date < date.today():
+        return RedirectResponse(url="/history")
+    
+    return templates.TemplateResponse("edit_booking.html", {
+        "request": request,
+        "booking": booking
+    })
+
+@router.post("/edit_booking/{booking_id}")
+def edit_booking_submit(
+    booking_id: int,
+    request: Request,
+    new_date: str = Form(...),
+    new_start: str = Form(...),
+    new_end: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        return RedirectResponse(url="/history")
+    
+    # Convert strings to datetime objects
+    new_date_obj = datetime.strptime(new_date, "%Y-%m-%d").date()
+    new_start_obj = datetime.strptime(new_start, "%H:%M").time()
+    new_end_obj = datetime.strptime(new_end, "%H:%M").time()
+
+    # Check for availability: any booking with same room and overlapping time
+    overlapping = db.query(Booking).filter(
+        Booking.room_number == booking.room_number,
+        Booking.date == new_date_obj,
+        Booking.id != booking.id,  # exclude current booking
+        Booking.start_time < new_end_obj,
+        Booking.end_time > new_start_obj
+    ).first()
+
+    if overlapping:
+        return templates.TemplateResponse("edit_booking.html", {
+            "request": request,
+            "booking": booking,
+            "error": "Selected time slot is not available."
+        })
+
+    # Update booking
+    booking.date = new_date_obj
+    booking.start_time = new_start_obj
+    booking.end_time = new_end_obj
+    db.commit()
+
+    return RedirectResponse(url="/history", status_code=303)
