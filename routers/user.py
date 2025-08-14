@@ -136,8 +136,14 @@ If you didn't request this, just ignore this email.
 
 
 # ------------------- Password Reset via Token -------------------
-@router.get("/reset-password")
+@router.get("/reset-password", response_class = HTMLResponse)
 def reset_password_form(request: Request, token: str):
+    payload, error = decode_access_token(token)
+
+    if error == "expired":
+        return templates.TemplateResponse("link_expired.html", {"request":request})
+    elif error == "invalid":
+        return templates.TemplateResponse("link_expired.html", {"request":request})
     return templates.TemplateResponse("reset_password.html", {"request": request, "token": token})
 
 @router.post("/reset-password")
