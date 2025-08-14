@@ -42,6 +42,11 @@
             box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
         }
 
+        /* Past booking highlight */
+        .past-booking {
+            background-color: #ffe5e5;
+        }
+
         .booking-info {
             display: flex;
             flex-direction: column;
@@ -148,7 +153,7 @@
 
     {% if bookings %}
         {% for booking in bookings %}
-            <div class="booking-card">
+            <div class="booking-card {% if booking.status == 'past' %}past-booking{% endif %}">
                 <div class="booking-info">
                     <span class="name">{{ booking.name }}</span>
                     <span class="room">Room {{ booking.room_number }}</span>

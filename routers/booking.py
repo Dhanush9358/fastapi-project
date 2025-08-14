@@ -6,7 +6,7 @@ from datetime import datetime, date, time, timedelta
 
 from database import get_db
 from models import Booking, User
-from auth import get_current_user  # ✅ make sure this exists in auth.py
+from auth import get_current_user
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -120,30 +120,29 @@ def booking_history(request: Request, db: Session = Depends(get_db)):
     bookings = db.query(Booking).filter(Booking.user_id == user.id).all()
 
     now = datetime.now()
-    today = now.date()
-    current_time = now.time()
 
-    # Add status & is_editable fields
     for b in bookings:
-        if b.date > today:
-            b.status = "upcoming"
-            b.is_editable = True
-        elif b.date == today:
-            if b.end_time > current_time:
-                b.status = "today"
-                b.is_editable = True
+        booking_end_dt = datetime.combine(b.date, b.end_time)
+
+        if booking_end_dt > now:
+            # Booking is still active or upcoming
+            if b.date > now.date():
+                b.status = "upcoming"
             else:
-                b.status = "past"
-                b.is_editable = False
+                b.status = "today"
+            b.is_editable = True
         else:
+            # Booking has ended
             b.status = "past"
             b.is_editable = False
 
-    return templates.TemplateResponse("history.html", {
-        "request": request,
-        "bookings": bookings,
-        "current_date": today
-    })
+    return templates.TemplateResponse(
+        "history.html",
+        {
+            "request": request,
+            "bookings": bookings
+        }
+    )
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
