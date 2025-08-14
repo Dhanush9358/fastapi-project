@@ -1,28 +1,78 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Booking History</title>
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-  {% if request.cookies.access_token %}
-    <a href="/logout" class="logout-link">Logout</a>
-  {% endif %}
+{% block title %}Booking History{% endblock %}
 
-  <div class="container">
+{% block content %}
+<style>
+    .booking-list {
+        list-style: none;
+        padding: 0;
+    }
+    .booking-list li {
+        background: #f9f9f9;
+        margin: 10px 0;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .booking-list li strong {
+        font-size: 16px;
+        color: #2c3e50;
+    }
+    .action-buttons {
+        margin-top: 8px;
+    }
+    .edit-btn, .cancel-btn {
+        padding: 4px 8px;
+        font-size: 14px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+    }
+    .edit-btn {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .cancel-btn {
+        background-color: #f44336;
+        color: white;
+        margin-left: 5px;
+    }
+    .edit-btn:hover { background-color: #45a049; }
+    .cancel-btn:hover { background-color: #e53935; }
+    .available { color: green; }
+    .booked { color: red; }
+</style>
+
+<div class="container">
     <h2>Your Bookings</h2>
-    <ul class="booking-list">
-      {% for booking in bookings %}
-        <li>
-          <strong>{{ booking.name }}</strong> booked Room {{ booking.room_number }}<br>
-          📅 {{ booking.date }} | ⏰ {{ booking.start_time }} to {{ booking.end_time }}
-        </li>
-      {% endfor %}
-    </ul>
+
+    {% if bookings %}
+        <ul class="booking-list">
+            {% for booking in bookings %}
+                <li>
+                    <strong>{{ booking.name }}</strong> booked Room {{ booking.room_number }}<br>
+                    📅 {{ booking.date }} | ⏰ {{ booking.start_time }} to {{ booking.end_time }}<br>
+                    <span class="{{ 'available' if booking.available else 'booked' }}">
+                        {{ 'Available' if booking.available else 'Booked' }}
+                    </span>
+                    {% if booking.is_future %}
+                        <div class="action-buttons">
+                            <a href="/edit_booking/{{ booking.id }}">
+                                <button class="edit-btn">Edit</button>
+                            </a>
+                            <a href="/cancel_booking/{{ booking.id }}" onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                <button class="cancel-btn">Cancel</button>
+                            </a>
+                        </div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No bookings found.</p>
+    {% endif %}
 
     <a href="/book" class="back-link">Book Another Room</a>
-  </div>
-
-</body>
-</html>
+</div>
+{% endblock %}

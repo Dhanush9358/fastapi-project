@@ -1,65 +1,89 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Room Booking</title>
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-  {% if request.cookies.access_token %}
-    <a href="/logout" class="logout-link">Logout</a>
-  {% endif %}
+{% block title %}Book a Room{% endblock %}
 
-  <div class="container">
-    <h2>Make a Room Reservation</h2>
+{% block content %}
+<div class="form-container">
+    <h2>Book a Room</h2>
+    <form id="bookingForm" method="POST" action="/book">
+        <label for="room">Room:</label>
+        <select id="room" name="room" required>
+            {% for room in rooms %}
+                <option value="{{ room }}">{{ room }}</option>
+            {% endfor %}
+        </select>
 
-    <form method="POST" action="/book" class="form-styled">
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
 
-      <label for="date">Date:</label>
-      <input type="date" id="date" name="date_str" min="{{ current_date }}" required>
+        <label for="start">Start Time:</label>
+        <input type="time" id="start" name="start" required>
 
-      <label for="start_time">From:</label>
-      <input type="time" id="start_time" name="start_time" required>
+        <label for="end">End Time:</label>
+        <input type="time" id="end" name="end" required>
 
-      <label for="end_time">To:</label>
-      <input type="time" id="end_time" name="end_time" required>
+        <div id="availabilityStatus" class="status-msg"></div>
 
-      <button type="submit">Book Room</button>
+        <label for="recurrence">Recurrence:</label>
+        <select id="recurrence" name="recurrence">
+            <option value="none">None</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+        </select>
+
+        <div id="recurrenceEndWrapper" style="display:none;">
+            <label for="recurrence_end">Recurrence End Date:</label>
+            <input type="date" id="recurrence_end" name="recurrence_end">
+        </div>
+
+        <button type="submit" class="btn">Book</button>
     </form>
 
-    {% if message %}
-      <p class="message {% if '✅' in message %}success{% else %}error{% endif %}">
-        {{ message }}
-      </p>
-    {% endif %}
+    <div class="calendar">
+        <h3>Room Availability</h3>
+        <table class="availability-table">
+            <tr><th>Date</th><th>Status</th></tr>
+            {% for day in availability %}
+                <tr>
+                    <td>{{ day.date }}</td>
+                    <td class="{{ 'available' if day.available else 'booked' }}">
+                        {{ 'Available' if day.available else 'Booked' }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
 
-    <a href="/history">View Booking History</a>
-  </div>
+<style>
+.available { color: green; }
+.booked { color: red; }
+</style>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const dateInput = document.getElementById("date");
-      const startInput = document.getElementById("start_time");
+<script>
+document.getElementById('recurrence').addEventListener('change', function() {
+    document.getElementById('recurrenceEndWrapper').style.display =
+        (this.value !== 'none') ? 'block' : 'none';
+});
 
-      const setMinStartTime = () => {
-        const today = new Date().toISOString().split("T")[0];
-        const selectedDate = dateInput.value;
-
-        if (selectedDate === today) {
-          const now = new Date();
-          const hours = String(now.getHours()).padStart(2, '0');
-          const minutes = String(now.getMinutes()).padStart(2, '0');
-          startInput.min = `${hours}:${minutes}`;
-        } else {
-          startInput.removeAttribute("min");
+// Real-time availability check
+['date', 'start', 'end', 'room'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+        let room = document.getElementById('room').value;
+        let date = document.getElementById('date').value;
+        let start = document.getElementById('start').value;
+        let end = document.getElementById('end').value;
+        if(room && date && start && end) {
+            fetch(`/check_availability?room=${room}&date=${date}&start=${start}&end=${end}`)
+                .then(res => res.json())
+                .then(data => {
+                    let status = document.getElementById('availabilityStatus');
+                    status.textContent = data.available ? "Available" : "Not Available";
+                    status.style.color = data.available ? "green" : "red";
+                });
         }
-      };
-
-      dateInput.addEventListener("change", setMinStartTime);
-      setMinStartTime(); // Initial trigger on load
     });
-  </script>
-</body>
-</html>
+});
+</script>
+{% endblock %}
