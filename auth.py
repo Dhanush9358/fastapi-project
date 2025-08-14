@@ -48,20 +48,16 @@ def decode_access_token(token: str) -> Tuple[Optional[Dict[str, Any]], Optional[
         return None, "invalid"
 
     
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+def get_current_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("access_token")
     if not token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        return None
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if not username:
-            raise HTTPException(status_code=401, detail="Invalid token")
+        username: str = payload.get("sub")  # or "username", whatever you put in token
+        if username is None:
+            return None
         user = db.query(User).filter(User.username == username).first()
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
         return user
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Session expired")
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        return None

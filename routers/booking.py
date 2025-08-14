@@ -113,14 +113,17 @@ def book_room(
 
 @router.get("/history")
 def booking_history(request: Request, db: Session = Depends(get_db)):
-    user_id = get_current_user(request)  # your method to get logged-in user
-    bookings = db.query(Booking).filter(Booking.user_id == user_id).all()
-    today = date.today()  # get current date
+    user = get_current_user(request, db)  # pass db explicitly
+    if not user:
+        return RedirectResponse(url="/login")
+    
+    bookings = db.query(Booking).filter(Booking.user_id == user.id).all()
+    today = date.today()
 
     return templates.TemplateResponse("history.html", {
         "request": request,
         "bookings": bookings,
-        "current_date": today  # pass current_date to template
+        "current_date": today
     })
 
 @router.get("/edit_booking/{booking_id}")
