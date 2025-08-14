@@ -103,7 +103,7 @@ async def forgot_post(
     if not user:
         return templates.TemplateResponse("forgot.html", {"request": request, "msg": "❌ Invalid email"})
 
-    # Token valid for 1 hour
+    # Token valid for 15 minutes
     reset_token = create_access_token({"sub": user.username}, expires_delta=timedelta(minutes=15))
     reset_link = f"{request.base_url}reset-password?token={reset_token}"
 
@@ -153,13 +153,13 @@ def reset_password_submit(
         return templates.TemplateResponse("reset_password.html", {
             "request": request,
             "token": token,
-            "msg": "❌ Reset link has expired. Please request a new one."
+            "msg": "Reset link has expired. Please request a new one."
         })
     elif error == "invalid":
         return templates.TemplateResponse("reset_password.html", {
             "request": request,
             "token": token,
-            "msg": "❌ Invalid reset link."
+            "msg": "Invalid reset link."
         })
 
     username = payload.get("sub")
@@ -168,7 +168,7 @@ def reset_password_submit(
         return templates.TemplateResponse("reset_password.html", {
             "request": request,
             "token": token,
-            "msg": "❌ User not found"
+            "msg": "User not found"
         })
 
     user.password = hash_password(new_password)
