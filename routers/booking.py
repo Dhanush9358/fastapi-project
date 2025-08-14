@@ -113,12 +113,31 @@ def book_room(
 
 @router.get("/history")
 def booking_history(request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)  # pass db explicitly
+    user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/login")
-    
+
     bookings = db.query(Booking).filter(Booking.user_id == user.id).all()
-    today = date.today()
+
+    now = datetime.now()
+    today = now.date()
+    current_time = now.time()
+
+    # Add status & is_editable fields
+    for b in bookings:
+        if b.date > today:
+            b.status = "upcoming"
+            b.is_editable = True
+        elif b.date == today:
+            if b.end_time > current_time:
+                b.status = "today"
+                b.is_editable = True
+            else:
+                b.status = "past"
+                b.is_editable = False
+        else:
+            b.status = "past"
+            b.is_editable = False
 
     return templates.TemplateResponse("history.html", {
         "request": request,

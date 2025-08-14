@@ -154,16 +154,16 @@
                     <span class="room">Room {{ booking.room_number }}</span>
                     <span>📅 {{ booking.date }}</span>
                     <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
-                    {% if booking.date > current_date %}
+                    {% if booking.status == "upcoming" %}
                         <span class="badge upcoming">Upcoming</span>
-                    {% elif booking.date == current_date %}
+                    {% elif booking.status == "today" %}
                         <span class="badge today">Today</span>
                     {% else %}
                         <span class="badge past">Past</span>
                     {% endif %}
                 </div>
                 <div class="booking-actions">
-                    {% if booking.date >= current_date %}
+                    {% if booking.is_editable %}
                         <a href="/edit_booking/{{ booking.id }}">
                             <button class="edit-btn">Edit</button>
                         </a>
@@ -174,7 +174,7 @@
             </div>
         {% endfor %}
     {% else %}
-        <p class="no-bookings">No bookings found.</p>
+        <p class="no-bookings">No bookings found</p>
     {% endif %}
 
     <div class="back-link-wrapper">
