@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=deice-width, initial-scale=1.0">
+    <!-- <meta charset="UTF-8">
+    <meta name="viewport" content="width=deice-width, initial-scale=1.0"> -->
     <title>Booking History</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
@@ -189,32 +189,19 @@
 function updateBookingStatus() {
     const now = new Date();
     document.querySelectorAll(".booking-card").forEach(card => {
-        const endTimeStr = card.getAttribute("data-end");
-        if (!endTimeStr) return;
+        const endTime = new Date(card.getAttribute("data-end"));
+        const editBtn = card.querySelector(".edit-btn");
 
-        const endTime = new Date(endTimeStr);
-
-        // If booking ended, mark as past
         if (now >= endTime) {
             card.classList.add("past-booking");
-
-            // Hide Edit button
-            const editBtn = card.querySelector(".edit-btn");
             if (editBtn) editBtn.style.display = "none";
-
-            // Update badge
-            const badgeContainer = card.querySelector(".booking-info");
-            let pastBadge = badgeContainer.querySelector(".badge.past");
-            if (!pastBadge) {
-                // Remove any existing badge
-                const existingBadge = badgeContainer.querySelector(".badge");
-                if (existingBadge) existingBadge.remove();
-
-                // Create past badge
-                pastBadge = document.createElement("span");
+            if (!card.querySelector(".badge.past")) {
+                let badge = card.querySelector(".badge");
+                if (badge) badge.remove();
+                let pastBadge = document.createElement("span");
                 pastBadge.className = "badge past";
                 pastBadge.innerText = "Past";
-                badgeContainer.appendChild(pastBadge);
+                card.querySelector(".booking-info").appendChild(pastBadge);
             }
         }
     });
