@@ -111,7 +111,7 @@ def book_room(
         "room_map": room_map
     })
 
-@router.get("/history")
+@router.get("/history", response_class=HTMLResponse)
 def booking_history(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     now = datetime.now()
     current_date = date.today()
@@ -123,13 +123,17 @@ def booking_history(request: Request, db: Session = Depends(get_db), current_use
         .all()
     )
 
+    updated_bookings = []
     for b in bookings:
         end_dt = datetime.combine(b.date, b.end_time)
         b.is_past = now > end_dt
+        b.end_datetime_str = end_dt.isoformat()
+        updated_bookings.append(b)
+
 
     return templates.TemplateResponse("history.html", {
         "request": request,
-        "bookings": bookings,
+        "bookings": updated_bookings,
         "current_date": current_date
     })
 
