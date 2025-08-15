@@ -111,48 +111,39 @@ def book_room(
         "room_map": room_map
     })
 
-@router.get("/history", response_class=HTMLResponse)
+@router.get("/history")
 def booking_history(
     request: Request,
-    search_start: str = None,
-    search_end: str = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
-    now = datetime.now()
-    current_date = date.today()
+    date_str = request.query_params.get("date")
+    start_time_str = request.query_params.get("start_time")
+    end_time_str = request.query_params.get("end_time")
 
-    query = db.query(Booking).filter(Booking.user_id == current_user.id)
+    query = db.query(Booking).filter(Booking.user_id == current_user["id"])
 
-    # Filter by date if provided
-    if search_start and search_end:
+    # Apply filters if provided
+    if date_str:
+        query = query.filter(Booking.date == date_str)
+    if start_time_str and end_time_str:
         try:
-            start_dt = datetime.fromisoformat(search_start)
-            end_dt = datetime.fromisoformat(search_end)
-
+            start_t = datetime.strptime(start_time_str, "%H:%M").time()
+            end_t = datetime.strptime(end_time_str, "%H:%M").time()
             query = query.filter(
-                (datetime.combine(Booking.date, Booking.start_time) < end_dt) &
-                (datetime.combine(Booking.date, Booking.end_time) > start_dt)
+                Booking.start_time < end_t,
+                Booking.end_time > start_t
             )
         except ValueError:
-            pass
+            pass  # Ignore invalid time format
 
-    bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
+    query = query.order_by(Booking.date.desc(), Booking.start_time.desc())
+    bookings = query.all()
 
-    updated_bookings = []
-    for b in bookings:
-        end_dt = datetime.combine(b.date, b.end_time)
-        b.is_past = now >= end_dt
-        b.end_datetime_str = end_dt.isoformat()
-        updated_bookings.append(b)
-
-    return templates.TemplateResponse("history.html", {
-        "request": request,
-        "bookings": updated_bookings,
-        "current_date": current_date,
-        "search_date": search_start or "",
-        "search_time": search_end or ""
-    })
+    return request.app.templates.TemplateResponse(
+        "history.html",
+        {"request": request, "bookings": bookings}
+    )
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):

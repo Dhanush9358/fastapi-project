@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=deice-width, initial-scale=1.0">
     <title>Booking History</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f8;
+            background-color: #f4f7fc;
             color: #333;
             margin: 0;
             padding: 0;
@@ -143,10 +145,12 @@
     </br>
 
     <form method="get" action="/history" class="search-form">
-        <label>Start:</label>
-        <input type="datetime-local" name="search_start" value="{{ search_start }}">
-        <label>End:</label>
-        <input type="datetime-local" name="search_end" value="{{ search_end}}">
+        <label>Date:</label>
+        <input type="date" name="search_date" value="{{ search_date }}">
+        <label>Start Time:</label>
+        <input type="time" name="search_start_time" value="{{ search_start_time }}">
+        <label>End Time:</label>
+        <input type="time" name="search_end_time" value="{{ search_end_time }}">
         <button type="submit">Search</button>
     </form> 
     
