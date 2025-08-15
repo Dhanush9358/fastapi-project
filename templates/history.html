@@ -189,19 +189,32 @@
 function updateBookingStatus() {
     const now = new Date();
     document.querySelectorAll(".booking-card").forEach(card => {
-        const endTime = new Date(card.getAttribute("data-end"));
-        const editBtn = card.querySelector(".edit-btn");
+        const endTimeStr = card.getAttribute("data-end");
+        if (!endTimeStr) return;
 
+        const endTime = new Date(endTimeStr);
+
+        // If booking ended, mark as past
         if (now >= endTime) {
             card.classList.add("past-booking");
+
+            // Hide Edit button
+            const editBtn = card.querySelector(".edit-btn");
             if (editBtn) editBtn.style.display = "none";
-            if (!card.querySelector(".badge.past")) {
-                let badge = card.querySelector(".badge");
-                if (badge) badge.remove();
-                let pastBadge = document.createElement("span");
+
+            // Update badge
+            const badgeContainer = card.querySelector(".booking-info");
+            let pastBadge = badgeContainer.querySelector(".badge.past");
+            if (!pastBadge) {
+                // Remove any existing badge
+                const existingBadge = badgeContainer.querySelector(".badge");
+                if (existingBadge) existingBadge.remove();
+
+                // Create past badge
+                pastBadge = document.createElement("span");
                 pastBadge.className = "badge past";
                 pastBadge.innerText = "Past";
-                card.querySelector(".booking-info").appendChild(pastBadge);
+                badgeContainer.appendChild(pastBadge);
             }
         }
     });
