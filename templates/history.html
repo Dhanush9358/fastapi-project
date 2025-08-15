@@ -143,6 +143,10 @@
     <br>
     <h2>Your Bookings</h2>
     </br>
+    {% if warning %}
+        <p style="color: red; text-align: center; font-weight: bold;">{{ warning }}</p>
+    {% endif %}
+
 
     <form method="get" action="/history" class="search-form">
         <input type="date" name="search_date" value="{{ search_date }}" placeholder="Select Date">

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Request, Form, Depends
+from fastapi import APIRouter, Request, Form, Depends, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import datetime, date, time, timedelta
+from typing import Optional
 
 from database import get_db
 from models import Booking, User
@@ -117,79 +118,51 @@ def book_room(
 def booking_history(
     request: Request,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    date: Optional[str] = Query(None),
+    time: Optional[str] = Query(None)
 ):
-    search_date = request.query_params.get("search_date")
-    search_start_time = request.query_params.get("search_start_time")
-    search_end_time = request.query_params.get("search_end_time")
+    # Check for warning: if time is given without date
+    warning_message = None
+    if time and not date:
+        warning_message = "Please select a date when filtering by time."
 
+    # Base query
     query = db.query(Booking).filter(Booking.user_id == current_user.id)
 
-    # Must include date for searching
-    if search_date:
-        query = query.filter(Booking.date == search_date)
-
-        # Time range logic
-        if search_start_time:
+    # Apply filters only if there's no warning
+    if not warning_message:
+        if date:
             try:
-                start_t = datetime.strptime(search_start_time, "%H:%M").time()
-
-                # If end time not given → set to 23:59
-                if search_end_time:
-                    end_t = datetime.strptime(search_end_time, "%H:%M").time()
-                else:
-                    end_t = time(23, 59)
-
-                query = query.filter(
-                    Booking.start_time <= end_t,
-                    Booking.end_time >= start_t
-                )
+                filter_date = datetime.strptime(date, "%Y-%m-%d").date()
+                query = query.filter(Booking.date == filter_date)
             except ValueError:
-                pass
-    else:
-        # No date → return no results
-        return templates.TemplateResponse(
-            "history.html",
-            {
-                "request": request,
-                "bookings": [],
-                "current_date": datetime.now().date(),
-                "search_date": "",
-                "search_start_time": search_start_time or "",
-                "search_end_time": search_end_time or ""
-            }
-        )
+                warning_message = "Invalid date format."
 
-    # Fetch and process bookings
+        if date and time:
+            try:
+                filter_time = datetime.strptime(time, "%H:%M").time()
+                query = query.filter(Booking.start_time >= filter_time)
+            except ValueError:
+                warning_message = "Invalid time format."
+
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
 
-    # Add "is_past" dynamically based on current datetime
+    # Mark expired bookings
     now = datetime.now()
-    processed_bookings = []
-    for b in bookings:
-        booking_end_datetime = datetime.combine(b.date, b.end_time)
-        is_past = now >= booking_end_datetime
-        processed_bookings.append({
-            "id": b.id,
-            "room_number": b.room_number,
-            "date": b.date,
-            "start_time": b.start_time,
-            "end_time": b.end_time,
-            "end_datetime_str": booking_end_datetime.isoformat(),
-            "is_past": is_past
-        })
+    for booking in bookings:
+        booking.is_expired = False
+        booking.can_edit = True
+        booking_datetime = datetime.combine(booking.date, booking.end_time)
+        if now >= booking_datetime:
+            booking.is_expired = True
+            booking.can_edit = False
 
-    return templates.TemplateResponse(
-        "history.html",
-        {
-            "request": request,
-            "bookings": processed_bookings,
-            "current_date": datetime.now().date(),
-            "search_date": search_date or "",
-            "search_start_time": search_start_time or "",
-            "search_end_time": search_end_time or ""
-        }
-    )
+    return {
+        "request": request,
+        "bookings": bookings,
+        "warning_message": warning_message
+    }
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
