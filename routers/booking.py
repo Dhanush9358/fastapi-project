@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import datetime, date, time, timedelta
 
 from database import get_db
 from models import Booking, User
 from auth import get_current_user
-from ..main import templates
+
 
 router = APIRouter()
+templates = Jinja2Templates(directory="templates")
 
 
 @router.get("/book", response_class=HTMLResponse)
@@ -136,11 +138,11 @@ def booking_history(
                 Booking.end_time > start_t
             )
         except ValueError:
-            pass  # Ignore invalid time format
+            pass
 
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
     
-    return request.app.templates.TemplateResponse(
+    return templates.TemplateResponse(
         "history.html",
         {
             "request": request, 
@@ -149,9 +151,7 @@ def booking_history(
             "search_date": search_date or "",
             "search_start_time": search_start_time or "",
             "search_end_time": search_end_time or ""
-            }
-
-        
+            } 
     )
 
 @router.get("/edit_booking/{booking_id}")
