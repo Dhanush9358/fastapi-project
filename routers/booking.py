@@ -125,33 +125,70 @@ def booking_history(
 
     query = db.query(Booking).filter(Booking.user_id == current_user.id)
 
-    # Apply filters if provided
+    # Must include date for searching
     if search_date:
         query = query.filter(Booking.date == search_date)
 
-    if search_start_time and search_end_time:
-        try:
-            start_t = datetime.strptime(search_start_time, "%H:%M").time()
-            end_t = datetime.strptime(search_end_time, "%H:%M").time()
-            query = query.filter(
-                Booking.start_time <= end_t,
-                Booking.end_time >= start_t
-            )
-        except ValueError:
-            pass
+        # Time range logic
+        if search_start_time:
+            try:
+                start_t = datetime.strptime(search_start_time, "%H:%M").time()
 
+                # If end time not given → set to 23:59
+                if search_end_time:
+                    end_t = datetime.strptime(search_end_time, "%H:%M").time()
+                else:
+                    end_t = time(23, 59)
+
+                query = query.filter(
+                    Booking.start_time <= end_t,
+                    Booking.end_time >= start_t
+                )
+            except ValueError:
+                pass
+    else:
+        # No date → return no results
+        return templates.TemplateResponse(
+            "history.html",
+            {
+                "request": request,
+                "bookings": [],
+                "current_date": datetime.now().date(),
+                "search_date": "",
+                "search_start_time": search_start_time or "",
+                "search_end_time": search_end_time or ""
+            }
+        )
+
+    # Fetch and process bookings
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
-    
+
+    # Add "is_past" dynamically based on current datetime
+    now = datetime.now()
+    processed_bookings = []
+    for b in bookings:
+        booking_end_datetime = datetime.combine(b.date, b.end_time)
+        is_past = now >= booking_end_datetime
+        processed_bookings.append({
+            "id": b.id,
+            "room_number": b.room_number,
+            "date": b.date,
+            "start_time": b.start_time,
+            "end_time": b.end_time,
+            "end_datetime_str": booking_end_datetime.isoformat(),
+            "is_past": is_past
+        })
+
     return templates.TemplateResponse(
         "history.html",
         {
-            "request": request, 
-            "bookings": bookings,
+            "request": request,
+            "bookings": processed_bookings,
             "current_date": datetime.now().date(),
             "search_date": search_date or "",
             "search_start_time": search_start_time or "",
             "search_end_time": search_end_time or ""
-            } 
+        }
     )
 
 @router.get("/edit_booking/{booking_id}")
