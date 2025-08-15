@@ -145,14 +145,11 @@
     </br>
 
     <form method="get" action="/history" class="search-form">
-        <label>Date:</label>
-        <input type="date" name="search_date" value="{{ search_date }}">
-        <label>Start Time:</label>
-        <input type="time" name="search_start_time" value="{{ search_start_time }}">
-        <label>End Time:</label>
-        <input type="time" name="search_end_time" value="{{ search_end_time }}">
+        <input type="date" name="search_date" value="{{ search_date }}" placeholder="Select Date">
+        <input type="time" name="search_start_time" value="{{ search_start_time }}" placeholder="Start Time">
+        <input type="time" name="search_end_time" value="{{ search_end_time }}" placeholder="End Time">
         <button type="submit">Search</button>
-    </form> 
+    </form>
     
     {% if bookings %}
         {% for booking in bookings %}

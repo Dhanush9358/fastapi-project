@@ -134,8 +134,8 @@ def booking_history(
             start_t = datetime.strptime(search_start_time, "%H:%M").time()
             end_t = datetime.strptime(search_end_time, "%H:%M").time()
             query = query.filter(
-                Booking.start_time < end_t,
-                Booking.end_time > start_t
+                Booking.start_time <= end_t,
+                Booking.end_time >= start_t
             )
         except ValueError:
             pass
