@@ -27,9 +27,7 @@ class Booking(Base):
 
     user = relationship("User", back_populates="bookings")
 
-    @property
-    def is_past(self):
-        """Return True if booking has already ended."""
-        end_datetime = datetime.combine(self.booking_date, self.end_time)
-        return datetime.now() > end_datetime
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.is_past = False
 
