@@ -111,17 +111,40 @@ def book_room(
         "room_map": room_map
     })
 
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy.orm import Session
+from datetime import datetime, date
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from models import Booking, User
+from database import get_db
+from auth import get_current_user
+
+router = APIRouter()
+templates = Jinja2Templates(directory="templates")
+
 @router.get("/history", response_class=HTMLResponse)
-def booking_history(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def booking_history(
+    request: Request,
+    search_date: str = None,
+    search_time: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     now = datetime.now()
     current_date = date.today()
 
-    bookings = (
-        db.query(Booking)
-        .filter(Booking.user_id == current_user.id)
-        .order_by(Booking.date.desc(), Booking.start_time.desc())
-        .all()
-    )
+    query = db.query(Booking).filter(Booking.user_id == current_user.id)
+
+    # Filter by date if provided
+    if search_date:
+        query = query.filter(Booking.date == search_date)
+
+    # Filter by time if provided
+    if search_time:
+        query = query.filter(Booking.start_time <= search_time, Booking.end_time >= search_time)
+
+    bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
 
     updated_bookings = []
     for b in bookings:
@@ -130,12 +153,14 @@ def booking_history(request: Request, db: Session = Depends(get_db), current_use
         b.end_datetime_str = end_dt.isoformat()
         updated_bookings.append(b)
 
-
     return templates.TemplateResponse("history.html", {
         "request": request,
         "bookings": updated_bookings,
-        "current_date": current_date
+        "current_date": current_date,
+        "search_date": search_date or "",
+        "search_time": search_time or ""
     })
+
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
