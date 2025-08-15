@@ -157,7 +157,7 @@
                 <div class="booking-info">
                     <span class="name">{{ booking.name }}</span>
                     <span class="room">Room {{ booking.room_number }}</span>
-                    <span>📅 {{ booking.date }}</span>
+                    <span>📅 {{ booking.booking_date }}</span>
                     <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
                     {% if booking.status == "upcoming" %}
                         <span class="badge upcoming">Upcoming</span>

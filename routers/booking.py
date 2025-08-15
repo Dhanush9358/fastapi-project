@@ -112,37 +112,39 @@ def book_room(
     })
 
 @router.get("/history")
-def booking_history(request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)
-    if not user:
-        return RedirectResponse(url="/login")
+def booking_history(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    bookings = db.query(Booking).filter(Booking.user_id == current_user.id).all()
 
-    bookings = db.query(Booking).filter(Booking.user_id == user.id).all()
+    current_time = datetime.now().replace(second=0, microsecond=0)
+    today_str = date.today().strftime("%Y-%m-%d")
 
-    now = datetime.now()
+    updated_bookings = []
+    for booking in bookings:
+        # Combine booking_date and times
+        start_dt = datetime.strptime(f"{booking.booking_date} {booking.start_time}", "%Y-%m-%d %H:%M")
+        end_dt = datetime.strptime(f"{booking.booking_date} {booking.end_time}", "%Y-%m-%d %H:%M")
 
-    for b in bookings:
-        booking_end_dt = datetime.combine(b.date, b.end_time)
-
-        if booking_end_dt > now:
-            # Booking is still active or upcoming
-            if b.date > now.date():
-                b.status = "upcoming"
+        # Determine booking status
+        if booking.booking_date < today_str:
+            booking.status = "past"
+        elif booking.booking_date == today_str:
+            if end_dt < current_time:
+                booking.status = "past"
             else:
-                b.status = "today"
-            b.is_editable = True
+                booking.status = "today"
         else:
-            # Booking has ended
-            b.status = "past"
-            b.is_editable = False
+            booking.status = "upcoming"
 
-    return templates.TemplateResponse(
-        "history.html",
-        {
-            "request": request,
-            "bookings": bookings
-        }
-    )
+        # Allow editing only for future bookings
+        booking.is_editable = booking.status in ["upcoming", "today"] and start_dt > current_time
+
+        updated_bookings.append(booking)
+
+    return templates.TemplateResponse("history.html", {
+        "request": request,
+        "bookings": updated_bookings,
+        "current_user": current_user
+    })
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
