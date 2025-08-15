@@ -126,6 +126,7 @@ def booking_history(
     # Apply filters if provided
     if search_date:
         query = query.filter(Booking.date == search_date)
+
     if search_start_time and search_end_time:
         try:
             start_t = datetime.strptime(search_start_time, "%H:%M").time()
@@ -139,17 +140,15 @@ def booking_history(
 
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
     
-    current_date = datetime.now().date().isoformat()
-
     return templates.TemplateResponse(
         "history.html",
         {
             "request": request, 
             "bookings": bookings,
-            "current_date": current_date,
+            "current_date": datetime.now().date(),
             "search_date": search_date or "",
             "search_start_time": search_start_time or "",
-            "search_ed_time": search_end_time or ""
+            "search_end_time": search_end_time or ""
             }
 
         
