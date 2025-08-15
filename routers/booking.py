@@ -117,19 +117,19 @@ def booking_history(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    date_str = request.query_params.get("date")
-    start_time_str = request.query_params.get("start_time")
-    end_time_str = request.query_params.get("end_time")
+    search_date = request.query_params.get("search_date")
+    search_start_time = request.query_params.get("search_start_time")
+    search_end_time = request.query_params.get("search_end_time")
 
     query = db.query(Booking).filter(Booking.user_id == current_user.id)
 
     # Apply filters if provided
-    if date_str:
-        query = query.filter(Booking.date == date_str)
-    if start_time_str and end_time_str:
+    if search_date:
+        query = query.filter(Booking.date == search_date)
+    if search_start_time and search_end_time:
         try:
-            start_t = datetime.strptime(start_time_str, "%H:%M").time()
-            end_t = datetime.strptime(end_time_str, "%H:%M").time()
+            start_t = datetime.strptime(search_start_time, "%H:%M").time()
+            end_t = datetime.strptime(search_end_time, "%H:%M").time()
             query = query.filter(
                 Booking.start_time < end_t,
                 Booking.end_time > start_t
@@ -137,12 +137,22 @@ def booking_history(
         except ValueError:
             pass  # Ignore invalid time format
 
-    query = query.order_by(Booking.date.desc(), Booking.start_time.desc())
-    bookings = query.all()
+    bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
+    
+    current_date = datetime.now().date().isoformat()
 
-    return request.app.templates.TemplateResponse(
+    return templates.TemplateResponse(
         "history.html",
-        {"request": request, "bookings": bookings}
+        {
+            "request": request, 
+            "bookings": bookings,
+            "current_date": current_date,
+            "search_date": search_date or "",
+            "search_start_time": search_start_time or "",
+            "search_ed_time": search_end_time or ""
+            }
+
+        
     )
 
 @router.get("/edit_booking/{booking_id}")
