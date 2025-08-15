@@ -114,8 +114,8 @@ def book_room(
 @router.get("/history", response_class=HTMLResponse)
 def booking_history(
     request: Request,
-    search_date: str = None,
-    search_time: str = None,
+    search_start: str = None,
+    search_end: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -125,19 +125,24 @@ def booking_history(
     query = db.query(Booking).filter(Booking.user_id == current_user.id)
 
     # Filter by date if provided
-    if search_date:
-        query = query.filter(Booking.date == search_date)
+    if search_start and search_end:
+        try:
+            start_dt = datetime.fromisoformat(search_start)
+            end_dt = datetime.fromisoformat(search_end)
 
-    # Filter by time if provided
-    if search_time:
-        query = query.filter(Booking.start_time <= search_time, Booking.end_time >= search_time)
+            query = query.filter(
+                (datetime.combine(Booking.date, Booking.start_time) < end_dt) &
+                (datetime.combine(Booking.date, Booking.end_time) > start_dt)
+            )
+        except ValueError:
+            pass
 
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
 
     updated_bookings = []
     for b in bookings:
         end_dt = datetime.combine(b.date, b.end_time)
-        b.is_past = now > end_dt
+        b.is_past = now >= end_dt
         b.end_datetime_str = end_dt.isoformat()
         updated_bookings.append(b)
 
@@ -145,8 +150,8 @@ def booking_history(
         "request": request,
         "bookings": updated_bookings,
         "current_date": current_date,
-        "search_date": search_date or "",
-        "search_time": search_time or ""
+        "search_date": search_start or "",
+        "search_time": search_end or ""
     })
 
 @router.get("/edit_booking/{booking_id}")

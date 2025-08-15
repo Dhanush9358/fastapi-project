@@ -40,7 +40,8 @@
             border-radius: 5px;
         }
         .search-form button:hover {
-            background-color: #45a049
+            background-color: #45a049;
+            text-decoration: none;
         }
 
         .booking-card {
@@ -142,8 +143,10 @@
     </br>
 
     <form method="get" action="/history" class="search-form">
-        <input type="date" name="search_date" value="{{ search_date }}">
-        <input type="time" name="search_time" value="{{ search_time}}">
+        <label>Start:</label>
+        <input type="datetime-local" name="search_start" value="{{ search_start }}">
+        <label>End:</label>
+        <input type="datetime-local" name="search_end" value="{{ search_end}}">
         <button type="submit">Search</button>
     </form> 
     
