@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import datetime, date, time, timedelta
 
 from database import get_db
 from models import Booking, User
 from auth import get_current_user
+from main import templates
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+
 
 @router.get("/book", response_class=HTMLResponse)
 def book_form(
@@ -140,7 +140,7 @@ def booking_history(
 
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
     
-    return templates.TemplateResponse(
+    return request.app.templates.TemplateResponse(
         "history.html",
         {
             "request": request, 
