@@ -124,6 +124,12 @@
             }
         }
     </style>
+    <script>
+        // Auto-refresh every 60 seconds
+        setInterval(function() {
+            location.reload();
+        }, 60000);
+    </script>
 </head>
 <body>
 <div class="container">
@@ -150,7 +156,7 @@
                             <button class="edit-btn">Edit</button>
                         </a>
                     {% else %}
-                        <span class="cannot-edit">Cannot Edit</span>
+                        <span class="cannot-edit"></span>
                     {% endif %}
                 </div>
             </div>
