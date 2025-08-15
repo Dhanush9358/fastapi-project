@@ -153,23 +153,22 @@
 
     {% if bookings %}
         {% for booking in bookings %}
-            <div class="booking-card {% if booking.status == 'past' %}past-booking{% endif %}">
+            <div class="booking-card {% if booking.is_past %}past-booking{% endif %}">
                 <div class="booking-info">
-                    <span class="name">{{ booking.name }}</span>
-                    <span class="room">Room {{ booking.room_number }}</span>
+                    <span class="room">{{ booking.room.name }}</span>
                     <span>📅 {{ booking.booking_date }}</span>
                     <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
-                    {% if booking.status == "upcoming" %}
-                        <span class="badge upcoming">Upcoming</span>
-                    {% elif booking.status == "today" %}
+                    {% if booking.is_past %}
+                        <span class="badge past">Past</span>
+                    {% elif booking.booking_date == current_date %}
                         <span class="badge today">Today</span>
                     {% else %}
-                        <span class="badge past">Past</span>
+                        <span class="badge upcoming">Upcoming</span>
                     {% endif %}
                 </div>
                 <div class="booking-actions">
-                    {% if booking.is_editable %}
-                        <a href="/edit_booking/{{ booking.id }}">
+                    {% if not booking.is_past %}
+                        <a href="/edit-booking/{{ booking.id }}">
                             <button class="edit-btn">Edit</button>
                         </a>
                     {% else %}

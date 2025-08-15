@@ -116,28 +116,24 @@ def booking_history(request: Request, db: Session = Depends(get_db), current_use
     bookings = db.query(Booking).filter(Booking.user_id == current_user.id).all()
 
     current_time = datetime.now()
+    updated_bookings = []
 
     for booking in bookings:
-        # Combine date + start/end time into datetime objects
-        start_dt = datetime.strptime(f"{booking.date} {booking.start_time}", "%Y-%m-%d %H:%M")
-        end_dt = datetime.strptime(f"{booking.date} {booking.end_time}", "%Y-%m-%d %H:%M")
+        # If stored as HH:MM:SS, use %H:%M:%S
+        end_datetime_str = f"{booking.date} {booking.end_time}"
+        end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
 
-        # Determine if booking is past
-        booking.is_editable = current_time < end_dt  # Editable only if end time hasn't passed
+        booking.is_past = current_time > end_datetime
+        updated_bookings.append(booking)
 
-        # Set status for styling
-        if current_time > end_dt:
-            booking.status = "past"
-        elif current_time.date() == start_dt.date():
-            booking.status = "today"
-        else:
-            booking.status = "upcoming"
-
-    return templates.TemplateResponse("history.html", {
-        "request": request,
-        "bookings": bookings,
-        "current_user": current_user
-    })
+    return templates.TemplateResponse(
+        "history.html",
+        {
+            "request": request,
+            "bookings": updated_bookings,
+            "current_user": current_user
+        }
+    )
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
