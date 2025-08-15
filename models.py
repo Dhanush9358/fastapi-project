@@ -27,7 +27,4 @@ class Booking(Base):
 
     user = relationship("User", back_populates="bookings")
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_past = False
 

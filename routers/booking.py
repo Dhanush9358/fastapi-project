@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, Depends, status
+from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -113,27 +113,25 @@ def book_room(
 
 @router.get("/history")
 def booking_history(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    bookings = db.query(Booking).filter(Booking.user_id == current_user.id).all()
-    
-    current_time = datetime.now()
-    
-    # Attach is_past dynamically (even though we also have @property)
-    for booking in bookings:
-        end_datetime_str = f"{booking.date} {booking.end_time}"
-        end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S") \
-            if len(str(booking.end_time).split(":")) == 3 \
-            else datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M")
-        booking.is_past = current_time > end_datetime
+    now = datetime.now()
+    current_date = date.today()
 
-    return templates.TemplateResponse(
-        "history.html",
-        {
-            "request": request,
-            "bookings": bookings,
-            "current_user": current_user,
-            "current_date": date.today()
-        }
+    bookings = (
+        db.query(Booking)
+        .filter(Booking.user_id == current_user.id)
+        .order_by(Booking.date.desc(), Booking.start_time.desc())
+        .all()
     )
+
+    for b in bookings:
+        end_dt = datetime.combine(b.date, b.end_time)
+        b.is_past = now > end_dt
+
+    return templates.TemplateResponse("history.html", {
+        "request": request,
+        "bookings": bookings,
+        "current_date": current_date
+    })
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
