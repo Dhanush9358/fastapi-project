@@ -115,34 +115,27 @@ def book_room(
 def booking_history(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     bookings = db.query(Booking).filter(Booking.user_id == current_user.id).all()
 
-    current_time = datetime.now().replace(second=0, microsecond=0)
-    today_str = date.today().strftime("%Y-%m-%d")
+    current_time = datetime.now()
 
-    updated_bookings = []
     for booking in bookings:
-        # Combine booking_date and times
-        start_dt = datetime.strptime(f"{booking.booking_date} {booking.start_time}", "%Y-%m-%d %H:%M")
-        end_dt = datetime.strptime(f"{booking.booking_date} {booking.end_time}", "%Y-%m-%d %H:%M")
+        # Combine date + start/end time into datetime objects
+        start_dt = datetime.strptime(f"{booking.date} {booking.start_time}", "%Y-%m-%d %H:%M")
+        end_dt = datetime.strptime(f"{booking.date} {booking.end_time}", "%Y-%m-%d %H:%M")
 
-        # Determine booking status
-        if booking.booking_date < today_str:
+        # Determine if booking is past
+        booking.is_editable = current_time < end_dt  # Editable only if end time hasn't passed
+
+        # Set status for styling
+        if current_time > end_dt:
             booking.status = "past"
-        elif booking.booking_date == today_str:
-            if end_dt < current_time:
-                booking.status = "past"
-            else:
-                booking.status = "today"
+        elif current_time.date() == start_dt.date():
+            booking.status = "today"
         else:
             booking.status = "upcoming"
 
-        # Allow editing only for future bookings
-        booking.is_editable = booking.status in ["upcoming", "today"] and start_dt > current_time
-
-        updated_bookings.append(booking)
-
     return templates.TemplateResponse("history.html", {
         "request": request,
-        "bookings": updated_bookings,
+        "bookings": bookings,
         "current_user": current_user
     })
 
