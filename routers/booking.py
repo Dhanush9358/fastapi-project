@@ -111,18 +111,6 @@ def book_room(
         "room_map": room_map
     })
 
-from fastapi import APIRouter, Depends, Request
-from sqlalchemy.orm import Session
-from datetime import datetime, date
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from models import Booking, User
-from database import get_db
-from auth import get_current_user
-
-router = APIRouter()
-templates = Jinja2Templates(directory="templates")
-
 @router.get("/history", response_class=HTMLResponse)
 def booking_history(
     request: Request,
@@ -160,7 +148,6 @@ def booking_history(
         "search_date": search_date or "",
         "search_time": search_time or ""
     })
-
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
