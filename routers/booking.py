@@ -6,7 +6,7 @@ from datetime import datetime, date, time, timedelta
 from database import get_db
 from models import Booking, User
 from auth import get_current_user
-from main import templates
+from ..main import templates
 
 router = APIRouter()
 
