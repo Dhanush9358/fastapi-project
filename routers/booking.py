@@ -121,7 +121,7 @@ def booking_history(
     start_time_str = request.query_params.get("start_time")
     end_time_str = request.query_params.get("end_time")
 
-    query = db.query(Booking).filter(Booking.user_id == current_user["id"])
+    query = db.query(Booking).filter(Booking.user_id == current_user.id)
 
     # Apply filters if provided
     if date_str:
