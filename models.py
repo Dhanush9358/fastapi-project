@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from database import Base
 
 class User(Base):
@@ -25,3 +26,10 @@ class Booking(Base):
     end_time = Column(Time, nullable=False)
 
     user = relationship("User", back_populates="bookings")
+
+    @property
+    def is_past(self):
+        """Return True if booking has already ended."""
+        end_datetime = datetime.combine(self.booking_date, self.end_time)
+        return datetime.now() > end_datetime
+

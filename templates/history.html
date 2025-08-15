@@ -11,20 +11,17 @@
             margin: 0;
             padding: 0;
         }
-
         .container {
             max-width: 900px;
             margin: 50px auto;
             padding: 0 20px 50px 20px;
         }
-
         h2 {
             text-align: center;
             color: #4CAF50;
             margin-bottom: 40px;
             font-size: 32px;
         }
-
         .booking-card {
             background: #fff;
             border-radius: 12px;
@@ -36,32 +33,25 @@
             align-items: center;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-
         .booking-card:hover {
             transform: translateY(-4px);
             box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
         }
-
-        /* Past booking highlight */
         .past-booking {
             background-color: #ffe5e5;
         }
-
         .booking-info {
             display: flex;
             flex-direction: column;
         }
-
         .booking-info span {
             margin: 4px 0;
             font-size: 16px;
         }
-
-        .booking-info .room {
+        .room {
             font-weight: bold;
             color: #2196F3;
         }
-
         .badge {
             padding: 5px 12px;
             border-radius: 14px;
@@ -72,17 +62,14 @@
             width: fit-content;
             text-align: center;
         }
-
         .badge.upcoming { background-color: #4CAF50; }
         .badge.today { background-color: #FF9800; }
         .badge.past { background-color: #F44336; }
-
         .booking-actions {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
-
         .edit-btn {
             background-color: #2196F3;
             color: white;
@@ -93,29 +80,23 @@
             font-size: 14px;
             transition: 0.3s;
         }
-
         .edit-btn:hover {
             background-color: #0b7dda;
         }
-
         .cannot-edit {
             color: #777;
             font-size: 14px;
         }
-
         .no-bookings {
             text-align: center;
             color: #777;
             font-size: 18px;
             margin-top: 50px;
         }
-
-        /* Centered "Book Another Room" button */
         .back-link-wrapper {
             text-align: center;
             margin-top: 40px;
         }
-
         .back-link {
             display: inline-block;
             text-decoration: none;
@@ -126,11 +107,9 @@
             font-size: 16px;
             transition: 0.3s;
         }
-
         .back-link:hover {
             background-color: #45a049;
         }
-
         @media (max-width: 600px) {
             .booking-card {
                 flex-direction: column;
@@ -147,7 +126,6 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <h2>Your Bookings</h2>
 
@@ -155,12 +133,12 @@
         {% for booking in bookings %}
             <div class="booking-card {% if booking.is_past %}past-booking{% endif %}">
                 <div class="booking-info">
-                    <span class="room">{{ booking.room.name }}</span>
-                    <span>📅 {{ booking.booking_date }}</span>
+                    <span class="room">Room {{ booking.room_number }}</span>
+                    <span>📅 {{ booking.date }}</span>
                     <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
                     {% if booking.is_past %}
                         <span class="badge past">Past</span>
-                    {% elif booking.booking_date == current_date %}
+                    {% elif booking.date == current_date %}
                         <span class="badge today">Today</span>
                     {% else %}
                         <span class="badge upcoming">Upcoming</span>
@@ -185,6 +163,5 @@
         <a href="/book" class="back-link">Book Another Room</a>
     </div>
 </div>
-
 </body>
 </html>
