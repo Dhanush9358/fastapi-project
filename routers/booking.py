@@ -158,7 +158,7 @@ def booking_history(
 
     # Mark expired bookings
     now = datetime.now()
-    today_str = date.today().strftime("%Y-%m-%d")  # Current date for template
+    today_str = datetime.today().date().strftime("%Y-%m-%d")  # Current date for template
     booking_list = []
     for booking in bookings:
         booking_datetime = datetime.combine(booking.date, booking.end_time)
