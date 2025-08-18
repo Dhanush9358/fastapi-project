@@ -125,12 +125,12 @@ def booking_history(
     # Check for warning: if time is given without date
     warning_message = None
     if time and not date:
-        warning_message = "⚠️ Please select a date when filtering by time."
+        warning_message = "Please select a date when filtering by time."
 
     # Base query
     query = db.query(Booking).filter(Booking.user_id == current_user.id)
 
-    # Apply filters only if no warning
+    # Apply filters only if there's no warning
     if not warning_message:
         if date:
             try:
@@ -148,31 +148,21 @@ def booking_history(
 
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
 
-    # Prepare safe data (no recursion issue)
+    # Mark expired bookings
     now = datetime.now()
-    booking_list = []
     for booking in bookings:
+        booking.is_expired = False
+        booking.can_edit = True
         booking_datetime = datetime.combine(booking.date, booking.end_time)
+        if now >= booking_datetime:
+            booking.is_expired = True
+            booking.can_edit = False
 
-        booking_list.append({
-            "id": booking.id,
-            "room_id": booking.room_id,
-            "date": booking.date.strftime("%Y-%m-%d"),
-            "start_time": booking.start_time.strftime("%H:%M"),
-            "end_time": booking.end_time.strftime("%H:%M"),
-            "is_expired": now >= booking_datetime,
-            "can_edit": now < booking_datetime
-        })
-
-    # Render template
-    return templates.TemplateResponse(
-        "history.html",
-        {
-            "request": request,
-            "bookings": booking_list,
-            "warning_message": warning_message
-        }
-    )
+    return {
+        "request": request,
+        "bookings": bookings,
+        "warning_message": warning_message
+    }
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
