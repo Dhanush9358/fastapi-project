@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- <meta charset="UTF-8">
-    <meta name="viewport" content="width=deice-width, initial-scale=1.0"> -->
     <title>Booking History</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
@@ -143,27 +141,27 @@
     <br>
     <h2>Your Bookings</h2>
     </br>
-    {% if warning %}
+    {% if warning_message %}
         <p style="color: red; text-align: center; font-weight: bold;">{{ warning }}</p>
     {% endif %}
 
 
     <form method="get" action="/history" class="search-form">
-        <input type="date" name="search_date" value="{{ search_date }}" placeholder="Select Date">
-        <input type="time" name="search_start_time" value="{{ search_start_time }}" placeholder="Start Time">
-        <input type="time" name="search_end_time" value="{{ search_end_time }}" placeholder="End Time">
+        <input type="date" name="date" value="{{ date }}" placeholder="Select Date">
+        <input type="time" name="start_time" value="{{ start_time }}" placeholder="Start Time">
+        <input type="time" name="end_time" value="{{ end_time }}" placeholder="End Time">
         <button type="submit">Search</button>
     </form>
     
     {% if bookings %}
         {% for booking in bookings %}
-            <div class="booking-card {% if booking.is_past %}past-booking{% endif %}" 
-                 data-end="{{ booking.end_datetime_str }}">
+            <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}" 
+                 data-end="{{ booking.date }}T{{ booking.end_time }}">
                 <div class="booking-info">
-                    <span class="room">Room {{ booking.room_number }}</span>
+                    <span class="room">Room {{ booking.room_id }}</span>
                     <span>📅 {{ booking.date }}</span>
                     <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
-                    {% if booking.is_past %}
+                    {% if booking.is_expired %}
                         <span class="badge past">Past</span>
                     {% elif booking.date == current_date %}
                         <span class="badge today">Today</span>
@@ -172,7 +170,7 @@
                     {% endif %}
                 </div>
                 <div class="booking-actions">
-                    {% if not booking.is_past %}
+                    {% if booking.can_edit %}
                         <a href="/edit_booking/{{ booking.id }}">
                             <button class="edit-btn">Edit</button>
                         </a>

@@ -120,11 +120,12 @@ def booking_history(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     date: Optional[str] = Query(None),
-    time: Optional[str] = Query(None)
+    start_time: Optional[str] = Query(None),
+    end_time: Optional[str] = Query(None)
 ):
     # Check for warning: if time is given without date
     warning_message = None
-    if time and not date:
+    if (start_time or end_time) and not date:
         warning_message = "Please select a date when filtering by time."
 
     # Base query
@@ -139,30 +140,52 @@ def booking_history(
             except ValueError:
                 warning_message = "Invalid date format."
 
-        if date and time:
+        if date and start_time:
             try:
-                filter_time = datetime.strptime(time, "%H:%M").time()
-                query = query.filter(Booking.start_time >= filter_time)
+                filter_start = datetime.strptime(start_time, "%H:%M").time()
+                query = query.filter(Booking.start_time >= filter_start)
             except ValueError:
-                warning_message = "Invalid time format."
+                warning_message = "Invalid start time format."
+
+        if date and end_time:
+            try:
+                filter_end = datetime.strptime(end_time, "%H:%M").time()
+                query = query.filter(Booking.end_time <= filter_end)
+            except ValueError:
+                warning_message = "Invalid end time format."
 
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
 
     # Mark expired bookings
     now = datetime.now()
+    today_str = date.today().strftime("%Y-%m-%d")  # Current date for template
+    booking_list = []
     for booking in bookings:
-        booking.is_expired = False
-        booking.can_edit = True
         booking_datetime = datetime.combine(booking.date, booking.end_time)
-        if now >= booking_datetime:
-            booking.is_expired = True
-            booking.can_edit = False
 
-    return {
-        "request": request,
-        "bookings": bookings,
-        "warning_message": warning_message
-    }
+        booking_list.append({
+            "id": booking.id,
+            "room_id": booking.room_id,
+            "date": booking.date.strftime("%Y-%m-%d"),
+            "start_time": booking.start_time.strftime("%H:%M"),
+            "end_time": booking.end_time.strftime("%H:%M"),
+            "is_expired": now >= booking_datetime,
+            "can_edit": now < booking_datetime
+        })
+
+    # Render template
+    return templates.TemplateResponse(
+        "history.html",
+        {
+            "request": request,
+            "bookings": booking_list,
+            "warning_message": warning_message,
+            "date": date,
+            "start_time": start_time,
+            "end_time": end_time,
+            "current_date": today_str  # pass today to template
+        }
+    )
 
 @router.get("/edit_booking/{booking_id}")
 def edit_booking_form(booking_id: int, request: Request, db: Session = Depends(get_db)):
