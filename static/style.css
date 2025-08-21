@@ -293,3 +293,6 @@ a:hover,
 .past-booking {
   background-color: #ffe5e5;
 }
+
+.badge.ongoing { background-color: #2196F3; } /* blue ongoing */
+.ongoing-booking { background-color: #e6f0ff; } /* light blue card bg */

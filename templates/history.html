@@ -157,6 +157,7 @@
         {% if bookings %}
             {% for booking in bookings %}
                 <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}" 
+                    data-start="{{ booking.date }}T{{ booking.start_time }}"
                     data-end="{{ booking.date }}T{{ booking.end_time }}">
                     <div class="booking-info">
                         <span class="room">Room {{ booking.room_number }}</span>
@@ -194,55 +195,61 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateBookingStatus() {
         const now = new Date();
         document.querySelectorAll(".booking-card").forEach(card => {
+            const startTimeStr = card.getAttribute("data-start");
             const endTimeStr = card.getAttribute("data-end");
-            if (!endTimeStr) return;
+            if (!endTimeStr || !startTimeStr) return;
 
+            const startTime = new Date(startTimeStr);
             const endTime = new Date(endTimeStr);
 
-            // If booking ended, mark as past
-            if (now >= endTime) {
-                card.classList.add("past-booking");
+            const badgeContainer = card.querySelector(".booking-info");
+            let badge = badgeContainer.querySelector(".badge");
 
-                // Hide Edit button
-                const editBtn = card.querySelector(".edit-btn");
+            // Reset old badge styles
+            if (badge) {
+                badge.classList.remove("upcoming", "today", "past", "ongoing");
+            }
+
+            const editBtn = card.querySelector(".edit-btn");
+
+            if (now < startTime) {
+                // Booking has not started yet → Upcoming
+                if (badge) {
+                    badge.classList.add("upcoming");
+                    badge.innerText = "Upcoming";
+                }
+                if (editBtn) editBtn.style.display = "inline-block";
+
+            } else if (now >= startTime && now < endTime) {
+                // Booking is ongoing → Ongoing
+                if (badge) {
+                    badge.classList.add("ongoing");
+                    badge.innerText = "Ongoing";
+                }
                 if (editBtn) editBtn.style.display = "none";
 
-                // Update badge to Past
-                const badgeContainer = card.querySelector(".booking-info");
-                let pastBadge = badgeContainer.querySelector(".badge.past");
-                if (!pastBadge) {
-                    const existingBadge = badgeContainer.querySelector(".badge");
-                    if (existingBadge) existingBadge.remove();
-                    pastBadge = document.createElement("span");
-                    pastBadge.className = "badge past";
-                    pastBadge.innerText = "Past";
-                    badgeContainer.appendChild(pastBadge);
-                } 
-                // Find existing badge
-                // const badgeContainer = card.querySelector(".booking-info");
-                // let badge = badgeContainer.querySelector(".badge");
+                card.classList.remove("past-booking"); // no red
+                card.classList.add("ongoing-booking"); // optional highlight
 
-                // if (badge) {
-                //     // Just change its style + text
-                //     badge.classList.remove("upcoming", "today");
-                //     badge.classList.add("past");
-                //     badge.innerText = "Past";
-                // } else {
-                //     // If no badge, create one
-                //     const pastBadge = document.createElement("span");
-                //     pastBadge.className = "badge past";
-                //     pastBadge.innerText = "Past";
-                //     badgeContainer.appendChild(pastBadge);
-                // }
+            } else if (now >= endTime) {
+                // Booking ended → Past
+                if (badge) {
+                    badge.classList.add("past");
+                    badge.innerText = "Past";
+                }
+                if (editBtn) editBtn.style.display = "none";
 
+                card.classList.add("past-booking");
+                card.classList.remove("ongoing-booking");
             }
         });
     }
 
-    // Initial run and check every 60s
+    // Initial run and check every 30s
     updateBookingStatus();
-    setInterval(updateBookingStatus, 60000);
+    setInterval(updateBookingStatus, 30000);
 });
+
 </script>
 </body>
 </html>
