@@ -224,6 +224,25 @@ a:hover,
   line-height: 1.5;
 }
 
+.bookings-wrapper {
+    max-height: 600px;   /* adjust as needed */
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-bottom: 20px;
+}
+
+/* Optional: make scrollbar nice */
+.bookings-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+.bookings-wrapper::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+.bookings-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
 /* Home/index page styling */
 .centered-page {
   font-family: Arial, sans-serif;

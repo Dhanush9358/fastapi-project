@@ -153,35 +153,37 @@
         <button type="submit">Search</button>
     </form>
     
-    {% if bookings %}
-        {% for booking in bookings %}
-            <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}" 
-                 data-end="{{ booking.date }}T{{ booking.end_time }}">
-                <div class="booking-info">
-                    <span class="room">Room {{ booking.room_id }}</span>
-                    <span>📅 {{ booking.date }}</span>
-                    <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
-                    {% if booking.is_expired %}
-                        <span class="badge past">Past</span>
-                    {% elif booking.date == current_date %}
-                        <span class="badge today">Today</span>
-                    {% else %}
-                        <span class="badge upcoming">Upcoming</span>
-                    {% endif %}
+    <div class="bookings-wrapper">
+        {% if bookings %}
+            {% for booking in bookings %}
+                <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}" 
+                    data-end="{{ booking.date }}T{{ booking.end_time }}">
+                    <div class="booking-info">
+                        <span class="room">Room {{ booking.room_id }}</span>
+                        <span>📅 {{ booking.date }}</span>
+                        <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
+                        {% if booking.is_expired %}
+                            <span class="badge past">Past</span>
+                        {% elif booking.date == current_date %}
+                            <span class="badge today">Today</span>
+                        {% else %}
+                            <span class="badge upcoming">Upcoming</span>
+                        {% endif %}
+                    </div>
+                    <div class="booking-actions">
+                        {% if booking.can_edit %}
+                            <a href="/edit_booking/{{ booking.id }}">
+                                <button class="edit-btn">Edit</button>
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="booking-actions">
-                    {% if booking.can_edit %}
-                        <a href="/edit_booking/{{ booking.id }}">
-                            <button class="edit-btn">Edit</button>
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p class="no-bookings">No bookings found</p>
-    {% endif %}
-
+            {% endfor %}
+        {% else %}
+            <p class="no-bookings">No bookings found</p>
+        {% endif %}
+    </div>
+    
     <div class="back-link-wrapper">
         <a href="/book" class="back-link">Book Another Room</a>
     </div>
