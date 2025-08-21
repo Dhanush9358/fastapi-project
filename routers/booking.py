@@ -165,7 +165,7 @@ def booking_history(
 
         booking_list.append({
             "id": booking.id,
-            "room_id": booking.room_id,
+            "room_number": booking.room_number,
             "date": booking.date.strftime("%Y-%m-%d"),
             "start_time": booking.start_time.strftime("%H:%M"),
             "end_time": booking.end_time.strftime("%H:%M"),
