@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (editBtn) editBtn.style.display = "none";
 
                 // Update badge to Past
-                const badgeContainer = card.querySelector(".booking-info");
+                /* const badgeContainer = card.querySelector(".booking-info");
                 let pastBadge = badgeContainer.querySelector(".badge.past");
                 if (!pastBadge) {
                     const existingBadge = badgeContainer.querySelector(".badge");
@@ -217,7 +217,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     pastBadge.className = "badge past";
                     pastBadge.innerText = "Past";
                     badgeContainer.appendChild(pastBadge);
+                } */
+                // Find existing badge
+                const badgeContainer = card.querySelector(".booking-info");
+                let badge = badgeContainer.querySelector(".badge");
+
+                if (badge) {
+                    // Just change its style + text
+                    badge.classList.remove("upcoming", "today");
+                    badge.classList.add("past");
+                    badge.innerText = "Past";
+                } else {
+                    // If no badge, create one
+                    const pastBadge = document.createElement("span");
+                    pastBadge.className = "badge past";
+                    pastBadge.innerText = "Past";
+                    badgeContainer.appendChild(pastBadge);
                 }
+
             }
         });
     }
