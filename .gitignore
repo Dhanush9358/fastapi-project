@@ -19,7 +19,7 @@ venv/
 Thumbs.db
 
 # Environment variables
-# .env
+.env
 
 # Local SQLite DB (not needed on cloud PostgreSQL)
 data.db
