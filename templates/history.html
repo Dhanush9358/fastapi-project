@@ -222,7 +222,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     badge.innerText = isToday ? "Today" : "Upcoming";
                     badge.classList.add(isToday ? "today" : "upcoming");
                 }
-                if (editBtn) editBtn.style.display = "inline-block";
+                if ((startTime - now) > 60 * 60 * 1000) {
+                    if (editBtn) editBtn.style.display = "inline-block";
+                } else {
+                    if (editBtn) editBtn.style.display = "none";
+                }
 
             } else if (now >= startTime && now < endTime && isToday) {
                 // Booking is ongoing → Ongoing
