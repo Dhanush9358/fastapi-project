@@ -194,6 +194,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     function updateBookingStatus() {
         const now = new Date();
+        const todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
         document.querySelectorAll(".booking-card").forEach(card => {
             const startTimeStr = card.getAttribute("data-start");
             const endTimeStr = card.getAttribute("data-end");
@@ -201,6 +202,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const startTime = new Date(startTimeStr);
             const endTime = new Date(endTimeStr);
+
+            const bookingDateStr = startTimeStr.split('T')[0]; // booking date
+            const isToday = bookingDateStr === todayStr;
 
             const badgeContainer = card.querySelector(".booking-info");
             let badge = badgeContainer.querySelector(".badge");
@@ -215,12 +219,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (now < startTime) {
                 // Booking has not started yet → Upcoming
                 if (badge) {
-                    badge.classList.add("upcoming");
-                    badge.innerText = "Upcoming";
+                    badge.innerText = isToday ? "Today" : "Upcoming";
+                    badge.classList.add(isToday ? "today" : "upcoming");
                 }
                 if (editBtn) editBtn.style.display = "inline-block";
 
-            } else if (now >= startTime && now < endTime) {
+            } else if (now >= startTime && now < endTime && isToday) {
                 // Booking is ongoing → Ongoing
                 if (badge) {
                     badge.classList.add("ongoing");
