@@ -296,3 +296,21 @@ a:hover,
 
 .badge.ongoing { background-color: #ff8c00; } /* blue ongoing */
 .ongoing-booking { background-color: #e6f0ff; } /* light blue card bg */
+
+/* Status-specific colors */
+.badge.upcoming {
+    background-color: #28a745; /* Blue for future bookings */
+}
+
+.badge.today {
+    background-color: #ff9500; /* Cyan for today's future bookings */
+}
+
+.badge.ongoing {
+    background-color: #00ffd9; /* Green for ongoing bookings */
+}
+
+.badge.past {
+    background-color: #dc3545; /* Red for past bookings */
+}
+
