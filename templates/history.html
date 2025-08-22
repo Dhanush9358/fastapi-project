@@ -185,7 +185,7 @@
                             <a href="/edit_booking/{{ booking.id }}">
                                 <button class="edit-btn" id="edit-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="edit">Edit</button>
                             </a>
-                            <a href="/delete_booking/{{ booking.id }}"> <!-- Added -->
+                            <a href="/delete_booking/{{ booking.id }}">
                                 <button class="delete-btn" id="delete-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="delete">Delete</button> <!-- Added -->
                             </a>
                         {% endif %}
