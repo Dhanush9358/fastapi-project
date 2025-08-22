@@ -296,8 +296,11 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch(`/delete-booking/${bookingId}`, {
                 method: "DELETE",
                 headers: {
-                    "Content-Type": "application/json"
-                }
+                    "Content-Type": "application/json",
+                    // ✅ Added authentication header if using JWT
+                    "Authorization": `Bearer ${localStorage.getItem("token")}` 
+                },
+                credentials: "include" // ✅ include cookies if session auth
             })
             .then(response => {
                 if (response.ok) {
