@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, Depends, Query
+from fastapi import APIRouter, Request, Form, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -68,7 +68,7 @@ def book_room(
     if end <= start:
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "message": "❌ End time must be after start time.",
+            "message": "End time must be after start time.",
             "current_date": today.isoformat(),
             "room_map": room_map
         })
@@ -243,3 +243,13 @@ def edit_booking_submit(
     db.commit()
 
     return RedirectResponse(url="/history", status_code=303)
+
+@router.delete("/delete-booking/{booking_id}")
+async def delete_booking(booking_id: int, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.user_id == user["id"]).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found or unauthorized")
+
+    db.delete(booking)
+    db.commit()
+    return {"message": "Booking deleted successfully"}

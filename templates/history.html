@@ -83,6 +83,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
+            gap: 8px;
         }
         .edit-btn {
             background-color: #2196F3;
@@ -95,6 +96,17 @@
             transition: 0.3s;
         }
         .edit-btn:hover { background-color: #0b7dda; }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .delete-btn:hover { background-color: #d32f2f; }
         .cannot-edit { color: #777; font-size: 14px; }
         .no-bookings {
             text-align: center;
@@ -171,26 +183,14 @@
                     <div class="booking-actions">
                         {% if booking.can_edit %}
                             <a href="/edit_booking/{{ booking.id }}">
-                                <button class="edit-btn" id="edit-btn-{{ booking.id }}">Edit</button>
+                                <button class="edit-btn" id="edit-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="edit">Edit</button>
+                            </a>
+                            <a href="/delete_booking/{{ booking.id }}"> <!-- Added -->
+                                <button class="delete-btn" id="delete-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="delete">Delete</button> <!-- Added -->
                             </a>
                         {% endif %}
                     </div>
                 </div>
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        const editButton = document.getElementById("edit-btn-{{ booking.id }}");
-                        if (editButton) {
-                            const cutoffTime = new Date("{{ booking.date }}T{{ booking.start_time }}").getTime() - (60 * 60 * 1000);
-                            function checkEditButton() {
-                                const now = new Date().getTime();
-                                if (now >= cutoffTime) {
-                                    editButton.style.display = 'none';
-                                }
-                            }
-                            setInterval(checkEditButton, 1000); // Check every second
-                        }
-                    });
-                </script>
             {% endfor %}
         {% else %}
             <p class="no-bookings">No bookings found</p>
@@ -227,6 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const editBtn = card.querySelector(".edit-btn");
+            const deleteBtn = card.querySelector(".delete-btn");
 
             if (now < startTime) {
                 // Booking has not started yet → Upcoming
@@ -234,10 +235,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     badge.innerText = isToday ? "Today" : "Upcoming";
                     badge.classList.add(isToday ? "today" : "upcoming");
                 }
-                if ((startTime - now) > 60 * 60 * 1000) {
+
+                if ((startTime - now) > 30 * 60 * 1000) {
                     if (editBtn) editBtn.style.display = "inline-block";
                 } else {
                     if (editBtn) editBtn.style.display = "none";
+                }
+
+                // Hide Delete 1 hour before (Added)
+                if ((startTime - now) > 60 * 60 * 1000) {
+                    if (deleteBtn) deleteBtn.style.display = "inline-block";
+                } else {
+                    if (deleteBtn) deleteBtn.style.display = "none";
                 }
 
             } else if (now >= startTime && now < endTime && isToday) {
@@ -247,6 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     badge.innerText = "Ongoing";
                 }
                 if (editBtn) editBtn.style.display = "none";
+                if (deleteBtn) deleteBtn.style.display = "none";
 
                 card.classList.remove("past-booking"); // no red
                 card.classList.add("ongoing-booking"); // optional highlight
@@ -258,6 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     badge.innerText = "Past";
                 }
                 if (editBtn) editBtn.style.display = "none";
+                if (deleteBtn) deleteBtn.style.display = "none";
 
                 card.classList.add("past-booking");
                 card.classList.remove("ongoing-booking");
