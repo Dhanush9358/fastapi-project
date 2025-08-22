@@ -79,9 +79,6 @@
             width: fit-content;
             text-align: center;
         }
-        .badge.upcoming { background-color: #4CAF50; }
-        .badge.today { background-color: #FF9800; }
-        .badge.past { background-color: #F44336; }
         .booking-actions {
             display: flex;
             flex-direction: column;
@@ -174,11 +171,26 @@
                     <div class="booking-actions">
                         {% if booking.can_edit %}
                             <a href="/edit_booking/{{ booking.id }}">
-                                <button class="edit-btn">Edit</button>
+                                <button class="edit-btn" id="edit-btn-{{ booking.id }}">Edit</button>
                             </a>
                         {% endif %}
                     </div>
                 </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const editButton = document.getElementById("edit-btn-{{ booking.id }}");
+                        if (editButton) {
+                            const cutoffTime = new Date("{{ booking.date }}T{{ booking.start_time }}").getTime() - (60 * 60 * 1000);
+                            function checkEditButton() {
+                                const now = new Date().getTime();
+                                if (now >= cutoffTime) {
+                                    editButton.style.display = 'none';
+                                }
+                            }
+                            setInterval(checkEditButton, 1000); // Check every second
+                        }
+                    });
+                </script>
             {% endfor %}
         {% else %}
             <p class="no-bookings">No bookings found</p>
@@ -253,9 +265,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Initial run and check every 30s
+    // Initial run and check every 1s
     updateBookingStatus();
-    setInterval(updateBookingStatus, 30000);
+    setInterval(updateBookingStatus, 1000);
 });
 
 </script>
