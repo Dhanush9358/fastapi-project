@@ -22,7 +22,6 @@
             margin-bottom: 40px;
             font-size: 32px;
         }
-
         .search-form {
             text-align: center;
             margin-bottom: 25px;
@@ -43,7 +42,6 @@
             background-color: #45a049;
             text-decoration: none;
         }
-
         .booking-card {
             background: #fff;
             border-radius: 12px;
@@ -107,7 +105,6 @@
             transition: 0.3s;
         }
         .delete-btn:hover { background-color: #d32f2f; }
-        .cannot-edit { color: #777; font-size: 14px; }
         .no-bookings {
             text-align: center;
             color: #777;
@@ -141,7 +138,7 @@
                 width: 100%;
                 margin-top: 12px;
             }
-            .edit-btn { width: 100%; }
+            .edit-btn, .delete-btn { width: 100%; }
         }
     </style>
 </head>
@@ -150,11 +147,6 @@
     <br>
     <h2>Your Bookings</h2>
     </br>
-    {% if warning_message %}
-        <p style="color: red; text-align: center; font-weight: bold;">{{ warning }}</p>
-    {% endif %}
-
-
     <form method="get" action="/history" class="search-form">
         <input type="date" name="date" value="{{ date }}" placeholder="Select Date">
         <input type="time" name="start_time" value="{{ start_time }}" placeholder="Start Time">
@@ -165,30 +157,22 @@
     <div class="bookings-wrapper">
         {% if bookings %}
             {% for booking in bookings %}
-                <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}" 
+                <div class="booking-card" id="booking-{{ booking.id }}" 
                     data-start="{{ booking.date }}T{{ booking.start_time }}"
                     data-end="{{ booking.date }}T{{ booking.end_time }}">
                     <div class="booking-info">
                         <span class="room">Room {{ booking.room_number }}</span>
                         <span>📅 {{ booking.date }}</span>
                         <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
-                        {% if booking.is_expired %}
-                            <span class="badge past">Past</span>
-                        {% elif booking.date == current_date %}
-                            <span class="badge today">Today</span>
-                        {% else %}
-                            <span class="badge upcoming">Upcoming</span>
-                        {% endif %}
+                        <span class="badge {% if booking.is_expired %}past{% elif booking.date == current_date %}today{% else %}upcoming{% endif %}">
+                            {% if booking.is_expired %}Past{% elif booking.date == current_date %}Today{% else %}Upcoming{% endif %}
+                        </span>
                     </div>
                     <div class="booking-actions">
-                        {% if booking.can_edit %}
-                            <a href="/edit_booking/{{ booking.id }}">
-                                <button class="edit-btn" id="edit-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="edit">Edit</button>
-                            </a>
-                            <a href="/delete_booking/{{ booking.id }}">
-                                <button class="delete-btn" id="delete-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="delete">Delete</button> <!-- Added -->
-                            </a>
-                        {% endif %}
+                        <a href="/edit_booking/{{ booking.id }}">
+                            <button type="button" class="edit-btn" id="edit-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}">Edit</button>
+                        </a>
+                        <button type="button" class="delete-btn" data-id="{{ booking.id }}">Delete</button>
                     </div>
                 </div>
             {% endfor %}
@@ -203,6 +187,7 @@
 </div>
 
 <script>
+// ✅ Real-time badge update + Edit/Delete visibility logic
 document.addEventListener("DOMContentLoaded", function () {
     function updateBookingStatus() {
         const now = new Date();
@@ -214,27 +199,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const startTime = new Date(startTimeStr);
             const endTime = new Date(endTimeStr);
+            const isToday = startTimeStr.split('T')[0] === todayStr;
 
-            const bookingDateStr = startTimeStr.split('T')[0]; // booking date
-            const isToday = bookingDateStr === todayStr;
-
-            const badgeContainer = card.querySelector(".booking-info");
-            let badge = badgeContainer.querySelector(".badge");
-
-            // Reset old badge styles
-            if (badge) {
-                badge.classList.remove("upcoming", "today", "past", "ongoing");
-            }
-
+            const badge = card.querySelector(".badge");
             const editBtn = card.querySelector(".edit-btn");
             const deleteBtn = card.querySelector(".delete-btn");
 
+            badge.classList.remove("upcoming", "today", "past", "ongoing");
+
             if (now < startTime) {
-                // Booking has not started yet → Upcoming
-                if (badge) {
-                    badge.innerText = isToday ? "Today" : "Upcoming";
-                    badge.classList.add(isToday ? "today" : "upcoming");
-                }
+                badge.innerText = isToday ? "Today" : "Upcoming";
+                badge.classList.add(isToday ? "today" : "upcoming");
 
                 if ((startTime - now) > 30 * 60 * 1000) {
                     if (editBtn) editBtn.style.display = "inline-block";
@@ -242,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (editBtn) editBtn.style.display = "none";
                 }
 
-                // Hide Delete 1 hour before (Added)
                 if ((startTime - now) > 60 * 60 * 1000) {
                     if (deleteBtn) deleteBtn.style.display = "inline-block";
                 } else {
@@ -250,37 +224,45 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
             } else if (now >= startTime && now < endTime && isToday) {
-                // Booking is ongoing → Ongoing
-                if (badge) {
-                    badge.classList.add("ongoing");
-                    badge.innerText = "Ongoing";
-                }
+                badge.classList.add("ongoing");
+                badge.innerText = "Ongoing";
                 if (editBtn) editBtn.style.display = "none";
                 if (deleteBtn) deleteBtn.style.display = "none";
-
-                card.classList.remove("past-booking"); // no red
-                card.classList.add("ongoing-booking"); // optional highlight
 
             } else if (now >= endTime) {
-                // Booking ended → Past
-                if (badge) {
-                    badge.classList.add("past");
-                    badge.innerText = "Past";
-                }
+                badge.classList.add("past");
+                badge.innerText = "Past";
                 if (editBtn) editBtn.style.display = "none";
                 if (deleteBtn) deleteBtn.style.display = "none";
-
-                card.classList.add("past-booking");
-                card.classList.remove("ongoing-booking");
             }
         });
     }
 
-    // Initial run and check every 1s
     updateBookingStatus();
     setInterval(updateBookingStatus, 1000);
-});
 
+    // ✅ Delete Booking Logic
+    document.querySelectorAll(".delete-btn").forEach(button => {
+        button.addEventListener("click", async function () {
+            const bookingId = this.getAttribute("data-id");
+            if (confirm("Are you sure you want to delete this booking?")) {
+                try {
+                    const response = await fetch(`/delete-booking/${bookingId}`, {
+                        method: "DELETE"
+                    });
+                    if (response.ok) {
+                        document.getElementById(`booking-${bookingId}`).remove();
+                        alert("Booking deleted successfully!");
+                    } else {
+                        alert("Failed to delete booking!");
+                    }
+                } catch (error) {
+                    alert("Error deleting booking!");
+                }
+            }
+        });
+    });
+});
 </script>
 </body>
 </html>
