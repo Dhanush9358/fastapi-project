@@ -307,7 +307,7 @@ a:hover,
 }
 
 .badge.ongoing {
-    background-color: #e4bb18; /* Green for ongoing bookings */
+    background-color: #002aff; /* Green for ongoing bookings */
 }
 
 .badge.past {
