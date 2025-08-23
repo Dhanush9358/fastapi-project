@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from datetime import date, time
 
 class UserCreate(BaseModel):
     username: str
@@ -23,3 +24,8 @@ class EmailRequest(BaseModel):
 class PasswordReset(BaseModel):
     token: str
     new_password: str
+
+class UpdateBooking(BaseModel):
+    new_date: date
+    new_start: time
+    new_end: time

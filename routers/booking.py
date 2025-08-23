@@ -8,6 +8,7 @@ from typing import Optional
 from database import get_db
 from models import Booking, User
 from auth import get_current_user
+from schemas import UpdateBooking
 
 
 router = APIRouter()
@@ -278,6 +279,23 @@ def edit_booking_submit(
 
     return RedirectResponse(url="/history", status_code=303)
 
+@router.put("/update-booking/{booking_id}")
+async def update_booking(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db), user = Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.user_id == user.id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    booking.date = details.new_date
+    booking.start_time = details.new_start
+    booking.end_time = details.new_end
+
+    db.commit()
+    db.refresh(booking)
+    return {"message": "Booking updated successfully"}
+
 
 @router.delete("/delete-booking/{booking_id}")
 async def delete_booking(booking_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
@@ -291,3 +309,4 @@ async def delete_booking(booking_id: int, db: Session = Depends(get_db), user: U
     db.delete(booking)
     db.commit()
     return {"message": "Booking deleted successfully"}
+

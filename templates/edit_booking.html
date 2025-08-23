@@ -1,43 +1,44 @@
-<!-- edit_booking.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Edit Booking</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <title>Edit Booking</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <h2>Edit Booking</h2>
 
-<div class="container">
-    <h2>Edit Booking</h2>
+  <form id="editBookingForm">
+    <input type="hidden" id="booking_id" value="{{ booking.id }}">
 
-    <form method="POST" action="/edit_booking/{{ booking.id }}">
-        <label>Date:</label>
-        <input type="date" name="date" value="{{ booking.date }}" required><br><br>
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" value="{{ booking.date }}" required><br><br>
 
-        <label>Start Time:</label>
-        <input type="time" name="start_time" value="{{ booking.start_time }}" required><br><br>
+    <label for="start_time">Start Time:</label>
+    <input type="time" id="start_time" name="start_time" value="{{ booking.start_time }}" required><br><br>
 
-        <label>End Time:</label>
-        <input type="time" name="end_time" value="{{ booking.end_time }}" required><br><br>
+    <label for="end_time">End Time:</label>
+    <input type="time" id="end_time" name="end_time" value="{{ booking.end_time }}" required><br><br>
 
-        <button type="submit">Update Booking</button>
-    </form>
-    {% if message %}
-      <p class="message {% if '✅' in message %}success{% else %}error{% endif %}">
-        {{ message }}
-      </p>
-    {% endif %}
-    <a href="/history">Back to History</a>
-</div>
-<script>
+    <button type="submit">Update Booking</button>
+  </form>
+
+  <p id="message" style="color: green; font-weight: bold;"></p>
+
+  <script>
     document.addEventListener("DOMContentLoaded", () => {
       const dateInput = document.getElementById("date");
       const startInput = document.getElementById("start_time");
+      const endInput = document.getElementById("end_time");
+      const form = document.getElementById("editBookingForm");
+      const bookingId = document.getElementById("booking_id").value;
+      const messageBox = document.getElementById("message");
+
+      // ✅ Prevent past dates
+      const today = new Date().toISOString().split("T")[0];
+      dateInput.min = today;
 
       const setMinStartTime = () => {
-        const today = new Date().toISOString().split("T")[0];
         const selectedDate = dateInput.value;
-
         if (selectedDate === today) {
           const now = new Date();
           const hours = String(now.getHours()).padStart(2, '0');
@@ -48,10 +49,52 @@
         }
       };
 
+      const setMinEndTime = () => {
+        endInput.min = startInput.value;
+      };
+
       dateInput.addEventListener("change", setMinStartTime);
-      setMinStartTime(); // Initial trigger on load
+      startInput.addEventListener("change", setMinEndTime);
+      setMinStartTime();
+      setMinEndTime();
+
+      // ✅ Handle Form Submit
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const new_date = dateInput.value;
+        const new_start = startInput.value;
+        const new_end = endInput.value;
+
+        if (!new_date || !new_start || !new_end) {
+          alert("Please fill all fields.");
+          return;
+        }
+
+        try {
+          const response = await fetch(`/update-booking/${bookingId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ new_date, new_start, new_end })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            messageBox.style.color = "green";
+            messageBox.textContent = data.message || "Booking updated successfully!";
+          } else {
+            const errorData = await response.json();
+            messageBox.style.color = "red";
+            messageBox.textContent = errorData.detail || "Failed to update booking.";
+          }
+        } catch (error) {
+          messageBox.style.color = "red";
+          messageBox.textContent = "An error occurred. Please try again.";
+        }
+      });
     });
   </script>
-
 </body>
 </html>
