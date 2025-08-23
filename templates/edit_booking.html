@@ -1,28 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Booking</title>
+  <link rel="stylesheet" href="/static/style.css">
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+      font-family: Arial, sans-serif;
       background: #f4f6f8;
       margin: 0;
       padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
     }
 
     .container {
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-      width: 100%;
       max-width: 400px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     h2 {
@@ -32,11 +27,10 @@
     }
 
     label {
-      font-size: 14px;
+      display: block;
+      margin-bottom: 8px;
       font-weight: bold;
       color: #444;
-      display: block;
-      margin-bottom: 6px;
     }
 
     input[type="date"],
@@ -47,7 +41,6 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 14px;
-      transition: border 0.3s;
     }
 
     input:focus {
@@ -59,11 +52,10 @@
       width: 100%;
       padding: 12px;
       background: #007bff;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
+      color: #fff;
       border: none;
       border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
       transition: background 0.3s;
     }
@@ -75,14 +67,19 @@
     #message {
       text-align: center;
       margin-top: 15px;
-      font-size: 14px;
+      font-weight: bold;
     }
 
-    @media (max-width: 500px) {
-      .container {
-        padding: 20px;
-        margin: 10px;
-      }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -105,7 +102,8 @@
       <button type="submit">Update Booking</button>
     </form>
 
-    <p id="message"></p>
+    <p id="message" style="color: green; font-weight: bold;"></p>
+    <a href="/history" class="back-link">Back to History</a>
   </div>
 
   <script>
@@ -117,7 +115,6 @@
       const bookingId = document.getElementById("booking_id").value;
       const messageBox = document.getElementById("message");
 
-      // ✅ Prevent past dates
       const today = new Date().toISOString().split("T")[0];
       dateInput.min = today;
 
@@ -142,7 +139,6 @@
       setMinStartTime();
       setMinEndTime();
 
-      // ✅ Handle Form Submit
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
