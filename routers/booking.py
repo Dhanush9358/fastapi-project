@@ -280,21 +280,51 @@ def edit_booking_submit(
     return RedirectResponse(url="/history", status_code=303)
 
 @router.put("/update-booking/{booking_id}")
-async def update_booking(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db), user = Depends(get_current_user)):
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+async def update_booking(
+    booking_id: int,
+    details: UpdateBooking,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
 
-    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.user_id == user.id).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
 
+    # Check if user is authorized
+    if booking.user_id != user["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized to edit this booking")
+
+    # Validate new timings
+    if details.new_start >= details.new_end:
+        raise HTTPException(status_code=400, detail="Start time must be before end time")
+
+    # Prevent past bookings
+    today = datetime.now().date()
+    if details.new_date < today or (details.new_date == today and details.new_start <= datetime.now().time()):
+        raise HTTPException(status_code=400, detail="Cannot book for past date or time")
+
+    # ✅ Check for conflicts with other bookings (same room)
+    conflict = db.query(Booking).filter(
+        Booking.room_number == booking.room_number,
+        Booking.date == details.new_date,
+        Booking.id != booking_id,  # Exclude current booking
+        Booking.start_time < details.new_end,
+        Booking.end_time > details.new_start
+    ).first()
+
+    if conflict:
+        raise HTTPException(status_code=400, detail="Booking conflict: Room already booked for this time")
+
+    # Update booking
     booking.date = details.new_date
     booking.start_time = details.new_start
     booking.end_time = details.new_end
 
     db.commit()
     db.refresh(booking)
-    return {"message": "Booking updated successfully"}
+
+    return {"message": "Booking updated successfully", "booking": booking}
 
 
 @router.delete("/delete-booking/{booking_id}")
