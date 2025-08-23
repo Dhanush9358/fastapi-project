@@ -229,7 +229,7 @@ def edit_booking_submit(
         return templates.TemplateResponse("edit_booking.html", {
             "request": request,
             "booking": booking,
-            "error": "Cannot change to a past date."
+            "error": "You cannot set a past date"
         })
 
     # ✅ Validation 2: Cannot set to time already passed (within today)
@@ -248,26 +248,32 @@ def edit_booking_submit(
             "error": "End time must be after start time."
         })
 
-    # ✅ Check for overlapping bookings
-    overlapping = db.query(Booking).filter(
-        Booking.room_number == booking.room_number,
-        Booking.date == new_date_obj,
-        Booking.id != booking.id,  # exclude current booking
-        Booking.start_time < new_end_obj,
-        Booking.end_time > new_start_obj
-    ).first()
+    # ✅ Find an available room (same logic as /book)
+    available_room = None
+    for room_number in range(1, 11):
+        conflict = db.query(Booking).filter(
+            Booking.date == new_date_obj,
+            Booking.room_number == room_number,
+            Booking.id != booking.id,  # exclude current booking
+            Booking.start_time < new_end_obj,
+            Booking.end_time > new_start_obj
+        ).first()
+        if not conflict:
+            available_room = room_number
+            break
 
-    if overlapping:
+    if not available_room:
         return templates.TemplateResponse("edit_booking.html", {
             "request": request,
             "booking": booking,
-            "error": "Selected time slot is not available."
+            "error": "❌ No rooms available for the selected time."
         })
 
-    # ✅ Update booking if all checks pass
+    # ✅ Update booking details
     booking.date = new_date_obj
     booking.start_time = new_start_obj
     booking.end_time = new_end_obj
+    booking.room_number = available_room
     db.commit()
 
     return RedirectResponse(url="/history", status_code=303)
