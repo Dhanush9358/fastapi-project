@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from passlib.context import CryptContext
 from jose import JWTError, jwt, ExpiredSignatureError
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException, Request, status
 
 from models import User
 from database import get_db
@@ -47,17 +47,23 @@ def decode_access_token(token: str) -> Tuple[Optional[Dict[str, Any]], Optional[
     except JWTError:
         return None, "invalid"
 
-    
+
 def get_current_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("access_token")
     if not token:
-        return None
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")  # or "username", whatever you put in token
+        username: str = payload.get("sub")
         if username is None:
-            return None
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
         user = db.query(User).filter(User.username == username).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
         return user
     except JWTError:
-        return None
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
+

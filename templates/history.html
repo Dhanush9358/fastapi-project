@@ -222,16 +222,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const bookingDateStr = startTimeStr.split('T')[0]; // booking date
             const isToday = bookingDateStr === todayStr;
 
-            const badgeContainer = card.querySelector(".booking-info");
-            let badge = badgeContainer.querySelector(".badge");
-
-            // Reset old badge styles
-            if (badge) {
-                badge.classList.remove("upcoming", "today", "past", "ongoing");
-            }
-
+            const badge = card.querySelector(".badge");
             const editBtn = card.querySelector(".edit-btn");
             const deleteBtn = card.querySelector(".delete-btn");
+
+            // Reset old badge styles
+            if (badge) badge.classList.remove("upcoming", "today", "past", "ongoing");
+            
 
             if (now < startTime) {
                 // Booking has not started yet → Upcoming
@@ -295,23 +292,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
             fetch(`/delete-booking/${bookingId}`, {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    // ✅ Added authentication header if using JWT
-                    "Authorization": `Bearer ${localStorage.getItem("token")}` 
-                },
-                credentials: "include" // ✅ include cookies if session auth
+                credentials: "include" 
             })
             .then(response => {
                 if (response.ok) {
                     // Remove card from DOM
                     this.closest(".booking-card").remove();
                 } else {
+                    console.error("Delete failed:", response);
                     alert("Failed to delete booking.");
                 }
             })
             .catch(err => {
-                console.error(err);
+                console.error("Error:",err);
                 alert("Error deleting booking.");
             });
         });
