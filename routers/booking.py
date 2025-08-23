@@ -280,49 +280,66 @@ def edit_booking_submit(
     return RedirectResponse(url="/history", status_code=303)
 
 @router.put("/update-booking/{booking_id}")
-async def update_booking(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
-    # Fetch the existing booking
-    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.user_id == user["id"]).first()
+async def update_booking(
+    booking_id: int,
+    details: UpdateBooking,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    # ✅ Fetch the existing booking
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.user_id == int(user.get("id"))  # ✅ Ensure user.id is integer
+    ).first()
 
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
 
-    # Convert to strings for comparison
+    # ✅ Convert to strings and validate
     new_date = details.new_date.strip()
     new_start = details.new_start.strip()
     new_end = details.new_end.strip()
 
-    # Validate start < end
-    if new_start >= new_end:
-        raise HTTPException(status_code=400, detail="Start time must be before end time")
-
-    # Prevent booking in the past
-    from datetime import datetime
-    today = datetime.now().date()
-    current_time = datetime.now().time()
-
+    # ✅ Validate date format
     try:
         selected_date = datetime.strptime(new_date, "%Y-%m-%d").date()
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
 
-    if selected_date < today or (selected_date == today and new_start <= current_time.strftime("%H:%M")):
+    # ✅ Validate time format and convert to time objects
+    try:
+        start_time_obj = datetime.strptime(new_start, "%H:%M").time()
+        end_time_obj = datetime.strptime(new_end, "%H:%M").time()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid time format. Use HH:MM")
+
+    # ✅ Validate start < end
+    if start_time_obj >= end_time_obj:
+        raise HTTPException(status_code=400, detail="Start time must be before end time")
+
+    # ✅ Prevent booking in the past
+    now = datetime.now()
+    today = now.date()
+    current_time = now.time()
+
+    if selected_date < today or (selected_date == today and start_time_obj <= current_time):
         raise HTTPException(status_code=400, detail="Cannot update booking to a past time")
 
-    # Check for conflict with other bookings
+    # ✅ Check for conflict with other bookings
     conflict = db.query(Booking).filter(
         Booking.room_number == booking.room_number,
         Booking.date == new_date,
-        Booking.id != booking_id,  # Exclude current booking
-        (
-            (Booking.start_time < new_end) & (Booking.end_time > new_start)
-        )
+        Booking.id != booking_id,  # ✅ Exclude current booking
+        (Booking.start_time < new_end) & (Booking.end_time > new_start)
     ).first()
 
     if conflict:
-        raise HTTPException(status_code=400, detail=f"Room {booking.room_number} is already booked for this time")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Room {booking.room_number} is already booked for this time"
+        )
 
-    # Update booking
+    # ✅ Update booking
     booking.date = new_date
     booking.start_time = new_start
     booking.end_time = new_end
@@ -330,13 +347,16 @@ async def update_booking(booking_id: int, details: UpdateBooking, db: Session = 
     db.commit()
     db.refresh(booking)
 
-    return {"message": "Booking updated successfully", "booking": {
-        "id": booking.id,
-        "room_number": booking.room_number,
-        "date": booking.date,
-        "start_time": booking.start_time,
-        "end_time": booking.end_time
-    }}
+    return {
+        "message": "Booking updated successfully",
+        "booking": {
+            "id": booking.id,
+            "room_number": booking.room_number,
+            "date": booking.date,
+            "start_time": booking.start_time,
+            "end_time": booking.end_time
+        }
+    }
 
 
 
