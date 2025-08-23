@@ -52,7 +52,7 @@ def book_room(
     if booking_date < today:
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "message": "❌ You cannot book a room for a past date.",
+            "message": "You cannot book a room for a past date.",
             "current_date": today.isoformat(),
             "room_map": room_map
         })
@@ -60,7 +60,7 @@ def book_room(
     if booking_start_datetime <= datetime.now() + timedelta(minutes=1):
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "message": "❌ Cannot book for a past date/time.",
+            "message": "Cannot book for a past date/time.",
             "current_date": today.isoformat(),
             "room_map": room_map
         })
@@ -88,7 +88,7 @@ def book_room(
     if not available_room:
         return templates.TemplateResponse("book.html", {
             "request": request,
-            "message": "❌ No rooms available for the selected time.",
+            "message": "No rooms available for the selected time.",
             "current_date": today.isoformat(),
             "room_map": room_map
         })
@@ -209,18 +209,46 @@ def edit_booking_submit(
     new_date: str = Form(...),
     new_start: str = Form(...),
     new_end: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)  # ✅ Ensure user is authenticated
 ):
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.user_id == current_user.id).first()
     if not booking:
         return RedirectResponse(url="/history")
-    
-    # Convert strings to datetime objects
+
+    today = date.today()
     new_date_obj = datetime.strptime(new_date, "%Y-%m-%d").date()
     new_start_obj = datetime.strptime(new_start, "%H:%M").time()
     new_end_obj = datetime.strptime(new_end, "%H:%M").time()
 
-    # Check for availability: any booking with same room and overlapping time
+    # ✅ Combine new date and start time to check if in past
+    new_start_datetime = datetime.combine(new_date_obj, new_start_obj)
+
+    # ✅ Validation 1: Cannot set to past date
+    if new_date_obj < today:
+        return templates.TemplateResponse("edit_booking.html", {
+            "request": request,
+            "booking": booking,
+            "error": "Cannot change to a past date."
+        })
+
+    # ✅ Validation 2: Cannot set to time already passed (within today)
+    if new_start_datetime <= datetime.now() + timedelta(minutes=1):
+        return templates.TemplateResponse("edit_booking.html", {
+            "request": request,
+            "booking": booking,
+            "error": "Cannot set to a past or ongoing time."
+        })
+
+    # ✅ Validation 3: End time must be after start time
+    if new_end_obj <= new_start_obj:
+        return templates.TemplateResponse("edit_booking.html", {
+            "request": request,
+            "booking": booking,
+            "error": "End time must be after start time."
+        })
+
+    # ✅ Check for overlapping bookings
     overlapping = db.query(Booking).filter(
         Booking.room_number == booking.room_number,
         Booking.date == new_date_obj,
@@ -236,13 +264,14 @@ def edit_booking_submit(
             "error": "Selected time slot is not available."
         })
 
-    # Update booking
+    # ✅ Update booking if all checks pass
     booking.date = new_date_obj
     booking.start_time = new_start_obj
     booking.end_time = new_end_obj
     db.commit()
 
     return RedirectResponse(url="/history", status_code=303)
+
 
 @router.delete("/delete-booking/{booking_id}")
 async def delete_booking(booking_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
