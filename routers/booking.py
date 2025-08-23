@@ -280,52 +280,63 @@ def edit_booking_submit(
     return RedirectResponse(url="/history", status_code=303)
 
 @router.put("/update-booking/{booking_id}")
-async def update_booking(
-    booking_id: int,
-    details: UpdateBooking,
-    db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
-):
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+async def update_booking(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+    # Fetch the existing booking
+    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.user_id == user["id"]).first()
 
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
 
-    # ✅ Check user authorization
-    if booking.user_id != user["id"]:
-        raise HTTPException(status_code=403, detail="Not authorized to edit this booking")
+    # Convert to strings for comparison
+    new_date = details.new_date.strip()
+    new_start = details.new_start.strip()
+    new_end = details.new_end.strip()
 
-    # ✅ Validate start and end time
-    if details.new_start >= details.new_end:
-        raise HTTPException(status_code=400, detail="End time must be after start time")
+    # Validate start < end
+    if new_start >= new_end:
+        raise HTTPException(status_code=400, detail="Start time must be before end time")
 
-    # ✅ Prevent past bookings
+    # Prevent booking in the past
+    from datetime import datetime
     today = datetime.now().date()
     current_time = datetime.now().time()
-    if details.new_date < today or (details.new_date == today and details.new_start <= current_time):
-        raise HTTPException(status_code=400, detail="Cannot book for past date or time")
 
-    # ✅ Count overlapping bookings for the given date and time
-    overlapping_bookings = db.query(Booking).filter(
-        Booking.date == details.new_date,
-        Booking.id != booking_id,  # Exclude the current booking
-        Booking.start_time < details.new_end,
-        Booking.end_time > details.new_start
-    ).count()
+    try:
+        selected_date = datetime.strptime(new_date, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
 
-    # ✅ Maximum 10 rooms available
-    if overlapping_bookings >= 10:
-        raise HTTPException(status_code=400, detail="All rooms are booked for this time slot")
+    if selected_date < today or (selected_date == today and new_start <= current_time.strftime("%H:%M")):
+        raise HTTPException(status_code=400, detail="Cannot update booking to a past time")
 
-    # ✅ Update booking details
-    booking.date = details.new_date
-    booking.start_time = details.new_start
-    booking.end_time = details.new_end
+    # Check for conflict with other bookings
+    conflict = db.query(Booking).filter(
+        Booking.room_number == booking.room_number,
+        Booking.date == new_date,
+        Booking.id != booking_id,  # Exclude current booking
+        (
+            (Booking.start_time < new_end) & (Booking.end_time > new_start)
+        )
+    ).first()
+
+    if conflict:
+        raise HTTPException(status_code=400, detail=f"Room {booking.room_number} is already booked for this time")
+
+    # Update booking
+    booking.date = new_date
+    booking.start_time = new_start
+    booking.end_time = new_end
 
     db.commit()
     db.refresh(booking)
 
-    return {"message": "Booking updated successfully", "booking": booking}
+    return {"message": "Booking updated successfully", "booking": {
+        "id": booking.id,
+        "room_number": booking.room_number,
+        "date": booking.date,
+        "start_time": booking.start_time,
+        "end_time": booking.end_time
+    }}
 
 
 

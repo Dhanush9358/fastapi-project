@@ -119,8 +119,7 @@
       dateInput.min = today;
 
       const setMinStartTime = () => {
-        const selectedDate = dateInput.value;
-        if (selectedDate === today) {
+        if (dateInput.value === today) {
           const now = new Date();
           const hours = String(now.getHours()).padStart(2, '0');
           const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -136,6 +135,7 @@
 
       dateInput.addEventListener("change", setMinStartTime);
       startInput.addEventListener("change", setMinEndTime);
+
       setMinStartTime();
       setMinEndTime();
 
@@ -147,9 +147,19 @@
         const new_end = endInput.value;
 
         if (!new_date || !new_start || !new_end) {
-          alert("Please fill all fields.");
+          messageBox.style.color = "red";
+          messageBox.textContent = "Please fill all fields.";
           return;
         }
+
+        if (new_end <= new_start) {
+          messageBox.style.color = "red";
+          messageBox.textContent = "End time must be after start time.";
+          return;
+        }
+
+        messageBox.style.color = "black";
+        messageBox.textContent = "Updating booking...";
 
         try {
           const response = await fetch(`/update-booking/${bookingId}`, {
@@ -160,7 +170,7 @@
             body: JSON.stringify({ new_date, new_start, new_end })
           });
 
-          const data = await response.json();  // ✅ Read JSON for both success and error
+          const data = await response.json();
 
           if (response.ok) {
             messageBox.style.color = "green";
