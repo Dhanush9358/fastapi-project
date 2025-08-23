@@ -160,18 +160,19 @@
             body: JSON.stringify({ new_date, new_start, new_end })
           });
 
+          const data = await response.json();  // ✅ Read JSON for both success and error
+
           if (response.ok) {
-            const data = await response.json();
             messageBox.style.color = "green";
             messageBox.textContent = data.message || "Booking updated successfully!";
+            setTimeout(() => window.location.href = "/history", 1500);
           } else {
-            const errorData = await response.json();
             messageBox.style.color = "red";
-            messageBox.textContent = errorData.detail || "Failed to update booking.";
+            messageBox.textContent = data.detail || "Failed to update booking.";
           }
         } catch (error) {
           messageBox.style.color = "red";
-          messageBox.textContent = "An error occurred. Please try again.";
+          messageBox.textContent = "Network error. Please try again.";
         }
       });
     });

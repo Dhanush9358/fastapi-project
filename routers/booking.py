@@ -291,32 +291,33 @@ async def update_booking(
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
 
-    # Check if user is authorized
+    # ✅ Check user authorization
     if booking.user_id != user["id"]:
         raise HTTPException(status_code=403, detail="Not authorized to edit this booking")
 
-    # Validate new timings
+    # ✅ Validate start and end time
     if details.new_start >= details.new_end:
-        raise HTTPException(status_code=400, detail="Start time must be before end time")
+        raise HTTPException(status_code=400, detail="End time must be after start time")
 
-    # Prevent past bookings
+    # ✅ Prevent past bookings
     today = datetime.now().date()
-    if details.new_date < today or (details.new_date == today and details.new_start <= datetime.now().time()):
+    current_time = datetime.now().time()
+    if details.new_date < today or (details.new_date == today and details.new_start <= current_time):
         raise HTTPException(status_code=400, detail="Cannot book for past date or time")
 
-    # ✅ Check for conflicts with other bookings (same room)
-    conflict = db.query(Booking).filter(
-        Booking.room_number == booking.room_number,
+    # ✅ Count overlapping bookings for the given date and time
+    overlapping_bookings = db.query(Booking).filter(
         Booking.date == details.new_date,
-        Booking.id != booking_id,  # Exclude current booking
+        Booking.id != booking_id,  # Exclude the current booking
         Booking.start_time < details.new_end,
         Booking.end_time > details.new_start
-    ).first()
+    ).count()
 
-    if conflict:
-        raise HTTPException(status_code=400, detail="Booking conflict: Room already booked for this time")
+    # ✅ Maximum 10 rooms available
+    if overlapping_bookings >= 10:
+        raise HTTPException(status_code=400, detail="All rooms are booked for this time slot")
 
-    # Update booking
+    # ✅ Update booking details
     booking.date = details.new_date
     booking.start_time = details.new_start
     booking.end_time = details.new_end
@@ -325,6 +326,7 @@ async def update_booking(
     db.refresh(booking)
 
     return {"message": "Booking updated successfully", "booking": booking}
+
 
 
 @router.delete("/delete-booking/{booking_id}")
