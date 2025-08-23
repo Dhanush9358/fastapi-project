@@ -289,7 +289,7 @@ async def update_booking(
     # ✅ Fetch the existing booking
     booking = db.query(Booking).filter(
         Booking.id == booking_id,
-        Booking.user_id == int(user.get("id"))  # ✅ Ensure user.id is integer
+        Booking.user_id == user.id  # ✅ Ensure user.id is integer
     ).first()
 
     if not booking:
