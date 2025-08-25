@@ -185,13 +185,7 @@
         if (response.ok) {
           if (data.available_rooms.length > 0) {
             availableRoomsContainer.style.color = "green";
-            const roomNumbers = data.available_rooms.map(item => {
-              if (typeof item === "object" && item.room_number) {
-                return item.room_number;
-              }
-              return item;
-            });
-            availableRoomsContainer.textContent = `Available Rooms: ${roomNumbers.join(", ")}`;
+            availableRoomsContainer.textContent = "Available rooms updated below.";
 
             // Update dropdown with available rooms
             roomSelect.innerHTML = "";
@@ -203,6 +197,13 @@
 
 
             roomNumbers.forEach(roomNumber => {
+              let roomNumber;
+              if (typeof item === "object") {
+                roomNumber = item.room_number || item.room || item.id;
+              } else {
+                roomNumber = item;
+              }
+              
               if (String(roomNumber) !== String(currentRoom)) {
                 const option = document.createElement("option");
                 option.value = roomNumber;
