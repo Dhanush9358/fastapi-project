@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, and_, or_
 from datetime import datetime, date, time, timedelta
 from typing import Optional
 
@@ -9,6 +9,7 @@ from database import get_db
 from models import Booking, User
 from auth import get_current_user
 from schemas import UpdateBooking
+import models
 
 
 router = APIRouter()
@@ -357,34 +358,27 @@ async def update_booking(
 
 
 @router.post("/available-rooms")
-async def available_rooms(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db)):
-    # Extract details
-    date = details.new_date.strip()
-    start = details.new_start.strip()
-    end = details.new_end.strip()
+async def available_rooms(data: dict, db: Session = Depends(get_db)):
+    new_date = data.get("new_date")
+    new_start = data.get("new_start")
+    new_end = data.get("new_end")
 
-    # Validate input
-    try:
-        datetime.strptime(date, "%Y-%m-%d")
-        datetime.strptime(start, "%H:%M")
-        datetime.strptime(end, "%H:%M")
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date or time format")
+    if not new_date or not new_start or not new_end:
+        raise HTTPException(status_code=400, detail="Missing fields")
 
-    # Find booked rooms for that time slot
-    booked_rooms = db.query(Booking.room_number).filter(
-        Booking.date == date,
-        Booking.id != booking_id,
-        (Booking.start_time < end) & (Booking.end_time > start)
+    # Fetch booked rooms for that date/time
+    booked_rooms = db.query(models.Booking.room_id).filter(
+        models.Booking.date == new_date,
+        or_(
+            and_(models.Booking.start_time < new_end, models.Booking.end_time > new_start)
+        )
     ).all()
+    booked_room_ids = [r[0] for r in booked_rooms]
 
-    booked_rooms = [room[0] for room in booked_rooms]
+    # Get available rooms
+    available_rooms = db.query(models.Room).filter(~models.Room.id.in_(booked_room_ids)).all()
 
-    # Fetch all rooms and exclude booked ones
-    all_rooms = [101, 102, 103, 104]  # Replace with DB query if rooms stored in DB
-    available_rooms = [r for r in all_rooms if r not in booked_rooms]
-
-    return {"available_rooms": available_rooms}
+    return {"available_rooms": [{"id": r.id, "name": r.name} for r in available_rooms]}
 
 
 @router.delete("/delete-booking/{booking_id}")
