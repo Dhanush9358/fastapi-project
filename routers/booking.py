@@ -350,7 +350,7 @@ async def update_booking(
 
 
 @router.post("/available-rooms/{booking_id}")
-async def available_rooms(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db)):
+async def available_rooms(booking_id: int, data: dict, details: UpdateBooking, db: Session = Depends(get_db)):
     date_str = details.new_date.strip()
     start = details.new_start.strip()
     end = details.new_end.strip()
@@ -362,6 +362,9 @@ async def available_rooms(booking_id: int, details: UpdateBooking, db: Session =
         datetime.strptime(end, "%H:%M")
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date or time format")
+    
+    if start >= end:
+        raise HTTPException(status_code=400, detail="End time must be after start time")
 
     # Find booked rooms for that time slot (excluding current booking)
     booked_rooms = db.query(Booking.room_number).filter(
@@ -373,7 +376,7 @@ async def available_rooms(booking_id: int, details: UpdateBooking, db: Session =
     booked_rooms = [room[0] for room in booked_rooms]
 
     # Fetch all rooms and exclude booked ones
-    all_rooms = [101, 102, 103, 104]  # Replace with DB query if rooms stored in DB
+    all_rooms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # Replace with DB query if rooms stored in DB
     available_rooms = [r for r in all_rooms if r not in booked_rooms]
 
     return {"available_rooms": available_rooms}
