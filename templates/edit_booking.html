@@ -134,7 +134,9 @@
     const messageBox = document.getElementById("message");
     const roomSelect = document.getElementById("room");
     const checkBtn = document.getElementById("checkAvailabilityBtn");
+    const availableRoomsContainer = document.getElementById("availableRooms");
 
+    const currentRoom = "{{ booking.room_number }}"; // Keep track of current room
     const today = new Date().toISOString().split("T")[0];
     dateInput.min = today;
 
@@ -166,7 +168,8 @@
       const new_end = endInput.value;
 
       if (!new_date || !new_start || !new_end) {
-        document.getElementById("availableRooms").textContent = "Please select date and time.";
+        availableRoomsContainer.style.color = "red";
+        availableRoomsContainer.textContent = "Please select date and time.";
         return;
       }
 
@@ -178,39 +181,45 @@
         });
 
         const data = await response.json();
-        const container = document.getElementById("availableRooms");
 
         if (response.ok) {
           if (data.available_rooms.length > 0) {
-            container.style.color = "green";
-            container.textContent = `Available Rooms: ${data.available_rooms.join(", ")}`;
+            availableRoomsContainer.style.color = "green";
+            const roomNumbers = data.available_rooms.map(item => 
+              typeof item === "object" ? item.room : item
+            );
+            availableRoomsContainer.textContent = `Available Rooms: ${roomNumbers.join(", ")}`;
 
             // Update dropdown with available rooms
             roomSelect.innerHTML = "";
+
             const currentOption = document.createElement("option");
-            currentOption.value = "{{ booking.room_number }}";
-            currentOption.textContent = `Current: {{ booking.room_number }}`;
+            currentOption.value = currentRoom;
+            currentOption.textContent = `Current: ${currentRoom}`;
             roomSelect.appendChild(currentOption);
 
-            data.available_rooms.forEach(room => {
-              if (room !== "{{ booking.room_number }}") {
+
+            roomNumbers.forEach(roomNumber => {
+              if (String(roomNumber) !== String(currentRoom)) {
                 const option = document.createElement("option");
-                option.value = room;
-                option.textContent = room;
+                option.value = roomNumber;
+                option.textContent = `Room ${roomNumber}`;
                 roomSelect.appendChild(option);
               }
             });
           } else {
-            container.style.color = "red";
-            container.textContent = "No rooms available for the selected time.";
+            availableRoomsContainer.style.color = "red";
+            availableRoomsContainer.textContent = "No rooms available for the selected time.";
             roomSelect.innerHTML = "<option value=''>No rooms available</option>";
           }
         } else {
-          container.style.color = "red";
-          container.textContent = data.detail || "Error checking availability.";
+          availableRoomsContainer.style.color = "red";
+          availableRoomsContainer.textContent = data.detail || "Error checking availability.";
         }
       } catch (error) {
-        document.getElementById("availableRooms").textContent = "Network error.";
+        availableRoomsContainer.style.color = "red";
+        availableRoomsContainer.textContent = "Network error.";
+
       }
     }
 
