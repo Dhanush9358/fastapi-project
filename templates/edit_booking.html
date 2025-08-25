@@ -100,7 +100,7 @@
       <input type="hidden" id="booking_id" value="{{ booking.id }}">
 
       <label for="date">Date:</label>
-      <input type="date" id="date" name="date" value="{{ booking.date }}" required>
+      <input type="date" id="date" name="date" value="{{ booking.date|strftime('%Y-%m-%d') }}" required>
 
       <label for="start_time">Start Time:</label>
       <input type="time" id="start_time" name="start_time" value="{{ booking.start_time }}" required>
@@ -112,7 +112,7 @@
 
       <div id="availableRooms" style="margin:10px 0; font-weight:bold;"></div>
 
-      <label for=""room>Select Room:</label>
+      <label for="room">Select Room:</label>
         <select id="room" name="room" required>
             <option value="{{ booking.room_number }}">Current: {{ booking.room_number }}</option>
         </select><br><br>
@@ -187,11 +187,18 @@
 
             // Update dropdown with available rooms
             roomSelect.innerHTML = "";
+            const currentOption = document.createElement("option");
+            currentOption.value = "{{ booking.room_number }}";
+            currentOption.textContent = `Current: {{ booking.room_number }}`;
+            roomSelect.appendChild(currentOption);
+
             data.available_rooms.forEach(room => {
-              const option = document.createElement("option");
-              option.value = room;
-              option.textContent = room;
-              roomSelect.appendChild(option);
+              if (room !== "{{ booking.room_number }}") {
+                const option = document.createElement("option");
+                option.value = room;
+                option.textContent = room;
+                roomSelect.appendChild(option);
+              }
             });
           } else {
             container.style.color = "red";

@@ -28,3 +28,4 @@ class UpdateBooking(BaseModel):
     new_date: str
     new_start: str
     new_end: str
+    room: str | None = None
