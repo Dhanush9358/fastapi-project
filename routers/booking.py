@@ -287,16 +287,15 @@ async def update_booking(
     db: Session = Depends(get_db),
     user: dict = Depends(get_current_user)
 ):
-    # ✅ Fetch the existing booking
     booking = db.query(Booking).filter(
         Booking.id == booking_id,
-        Booking.user_id == user.id  # ✅ Ensure user.id is integer
+        Booking.user_id == user.id
     ).first()
 
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
 
-    # ✅ Convert to strings and validate
+    # ✅ Extract and validate inputs
     new_date = details.new_date.strip()
     new_start = details.new_start.strip()
     new_end = details.new_end.strip()
@@ -305,36 +304,30 @@ async def update_booking(
     if not new_room:
         raise HTTPException(status_code=400, detail="Room selection is required")
 
-    # ✅ Validate date format
     try:
         selected_date = datetime.strptime(new_date, "%Y-%m-%d").date()
-        start_time_obj = datetime.strptime(new_start, "%H:%M" if len(new_start) == 5 else "%H:%M:%S").time()
-        end_time_obj = datetime.strptime(new_end, "%H:%M" if len(new_end) == 5 else "%H:%M:%S").time()
+        start_time_obj = datetime.strptime(new_start, "%H:%M").time()
+        end_time_obj = datetime.strptime(new_end, "%H:%M").time()
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date or time format")
 
-    # ✅ Validate start < end
     if start_time_obj >= end_time_obj:
         raise HTTPException(status_code=400, detail="Start time must be before end time")
 
-    # ✅ Prevent booking in the past
     now = datetime.now()
     if selected_date < now.date() or (selected_date == now.date() and start_time_obj <= now.time()):
         raise HTTPException(status_code=400, detail="Cannot update booking to a past time")
 
-    # ✅ Check for conflict with other bookings
+    # ✅ Conflict check for selected room
     conflict = db.query(Booking).filter(
         Booking.room_number == new_room,
         Booking.date == new_date,
-        Booking.id != booking_id,  # ✅ Exclude current booking
+        Booking.id != booking_id,
         (Booking.start_time < new_end) & (Booking.end_time > new_start)
     ).first()
 
     if conflict:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Room {booking.room_number} is already booked for this time"
-        )
+        raise HTTPException(status_code=400, detail=f"Room {new_room} is already booked for this time")
 
     # ✅ Update booking
     booking.date = new_date
@@ -357,28 +350,34 @@ async def update_booking(
     }
 
 
-@router.post("/available-rooms")
-async def available_rooms(data: dict, db: Session = Depends(get_db)):
-    new_date = data.get("new_date")
-    new_start = data.get("new_start")
-    new_end = data.get("new_end")
+@router.post("/available-rooms/{booking_id}")
+async def available_rooms(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db)):
+    date_str = details.new_date.strip()
+    start = details.new_start.strip()
+    end = details.new_end.strip()
 
-    if not new_date or not new_start or not new_end:
-        raise HTTPException(status_code=400, detail="Missing fields")
+    # Validate input
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+        datetime.strptime(start, "%H:%M")
+        datetime.strptime(end, "%H:%M")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date or time format")
 
-    # Fetch booked rooms for that date/time
-    booked_rooms = db.query(models.Booking.room_id).filter(
-        models.Booking.date == new_date,
-        or_(
-            and_(models.Booking.start_time < new_end, models.Booking.end_time > new_start)
-        )
+    # Find booked rooms for that time slot (excluding current booking)
+    booked_rooms = db.query(Booking.room_number).filter(
+        Booking.date == date_str,
+        Booking.id != booking_id,
+        (Booking.start_time < end) & (Booking.end_time > start)
     ).all()
-    booked_room_ids = [r[0] for r in booked_rooms]
 
-    # Get available rooms
-    available_rooms = db.query(models.Room).filter(~models.Room.id.in_(booked_room_ids)).all()
+    booked_rooms = [room[0] for room in booked_rooms]
 
-    return {"available_rooms": [{"id": r.id, "name": r.name} for r in available_rooms]}
+    # Fetch all rooms and exclude booked ones
+    all_rooms = [101, 102, 103, 104]  # Replace with DB query if rooms stored in DB
+    available_rooms = [r for r in all_rooms if r not in booked_rooms]
+
+    return {"available_rooms": available_rooms}
 
 
 @router.delete("/delete-booking/{booking_id}")
