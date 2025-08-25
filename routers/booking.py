@@ -356,6 +356,35 @@ async def update_booking(
     }
 
 
+@router.post("/available-rooms")
+async def available_rooms(details: UpdateBooking, db: Session = Depends(get_db)):
+    # Extract details
+    date = details.new_date.strip()
+    start = details.new_start.strip()
+    end = details.new_end.strip()
+
+    # Validate input
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+        datetime.strptime(start, "%H:%M")
+        datetime.strptime(end, "%H:%M")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date or time format")
+
+    # Find booked rooms for that time slot
+    booked_rooms = db.query(Booking.room_number).filter(
+        Booking.date == date,
+        (Booking.start_time < end) & (Booking.end_time > start)
+    ).all()
+
+    booked_rooms = [room[0] for room in booked_rooms]
+
+    # Fetch all rooms and exclude booked ones
+    all_rooms = [101, 102, 103, 104]  # Replace with DB query if rooms stored in DB
+    available_rooms = [r for r in all_rooms if r not in booked_rooms]
+
+    return {"available_rooms": available_rooms}
+
 
 @router.delete("/delete-booking/{booking_id}")
 async def delete_booking(booking_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):

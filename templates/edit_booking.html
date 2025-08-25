@@ -99,6 +99,10 @@
       <label for="end_time">End Time:</label>
       <input type="time" id="end_time" name="end_time" value="{{ booking.end_time }}" required>
 
+      <div id="availableRooms" style="margin-top:10px; font-size:14px; color:#333;">
+        Available rooms will appear here.
+      </div>
+
       <button type="submit">Update Booking</button>
     </form>
 
@@ -107,85 +111,131 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const dateInput = document.getElementById("date");
-      const startInput = document.getElementById("start_time");
-      const endInput = document.getElementById("end_time");
-      const form = document.getElementById("editBookingForm");
-      const bookingId = document.getElementById("booking_id").value;
-      const messageBox = document.getElementById("message");
+  document.addEventListener("DOMContentLoaded", () => {
+    const dateInput = document.getElementById("date");
+    const startInput = document.getElementById("start_time");
+    const endInput = document.getElementById("end_time");
+    const form = document.getElementById("editBookingForm");
+    const bookingId = document.getElementById("booking_id").value;
+    const messageBox = document.getElementById("message");
 
-      const today = new Date().toISOString().split("T")[0];
-      dateInput.min = today;
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.min = today;
 
-      const setMinStartTime = () => {
-        if (dateInput.value === today) {
-          const now = new Date();
-          const hours = String(now.getHours()).padStart(2, '0');
-          const minutes = String(now.getMinutes()).padStart(2, '0');
-          startInput.min = `${hours}:${minutes}`;
-        } else {
-          startInput.removeAttribute("min");
-        }
-      };
+    const setMinStartTime = () => {
+      if (dateInput.value === today) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        startInput.min = `${hours}:${minutes}`;
+      } else {
+        startInput.removeAttribute("min");
+      }
+    };
 
-      const setMinEndTime = () => {
-        endInput.min = startInput.value;
-      };
+    const setMinEndTime = () => {
+      endInput.min = startInput.value;
+    };
 
-      dateInput.addEventListener("change", setMinStartTime);
-      startInput.addEventListener("change", setMinEndTime);
+    dateInput.addEventListener("change", setMinStartTime);
+    startInput.addEventListener("change", setMinEndTime);
 
-      setMinStartTime();
-      setMinEndTime();
+    setMinStartTime();
+    setMinEndTime();
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    // ✅ Availability Check Logic
+    async function checkAvailability() {
+      const new_date = dateInput.value;
+      const new_start = startInput.value;
+      const new_end = endInput.value;
 
-        const new_date = dateInput.value;
-        const new_start = startInput.value;
-        const new_end = endInput.value;
+      const container = document.getElementById("availableRooms");
 
-        if (!new_date || !new_start || !new_end) {
-          messageBox.style.color = "red";
-          messageBox.textContent = "Please fill all fields.";
-          return;
-        }
+      if (!new_date || !new_start || !new_end) {
+        container.style.color = "#555";
+        container.textContent = "Please select date and time.";
+        return;
+      }
 
-        if (new_end <= new_start) {
-          messageBox.style.color = "red";
-          messageBox.textContent = "End time must be after start time.";
-          return;
-        }
+      try {
+        const response = await fetch("/available-rooms", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ new_date, new_start, new_end })
+        });
 
-        messageBox.style.color = "black";
-        messageBox.textContent = "Updating booking...";
+        const data = await response.json();
 
-        try {
-          const response = await fetch(`/update-booking/${bookingId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ new_date, new_start, new_end })
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            messageBox.style.color = "green";
-            messageBox.textContent = data.message || "Booking updated successfully!";
-            setTimeout(() => window.location.href = "/history", 1500);
+        if (response.ok) {
+          if (data.available_rooms.length > 0) {
+            container.style.color = "green";
+            container.textContent = `Available Rooms: ${data.available_rooms.join(", ")}`;
           } else {
-            messageBox.style.color = "red";
-            messageBox.textContent = data.detail || "Failed to update booking.";
+            container.style.color = "red";
+            container.textContent = "No rooms available for the selected time.";
           }
-        } catch (error) {
-          messageBox.style.color = "red";
-          messageBox.textContent = "Network error. Please try again.";
+        } else {
+          container.style.color = "red";
+          container.textContent = data.detail || "Error checking availability.";
         }
-      });
+      } catch (error) {
+        container.style.color = "red";
+        container.textContent = "Network error.";
+      }
+    }
+
+    dateInput.addEventListener("change", checkAvailability);
+    startInput.addEventListener("change", checkAvailability);
+    endInput.addEventListener("change", checkAvailability);
+
+    // ✅ Submit form
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const new_date = dateInput.value;
+      const new_start = startInput.value;
+      const new_end = endInput.value;
+
+      if (!new_date || !new_start || !new_end) {
+        messageBox.style.color = "red";
+        messageBox.textContent = "Please fill all fields.";
+        return;
+      }
+
+      if (new_end <= new_start) {
+        messageBox.style.color = "red";
+        messageBox.textContent = "End time must be after start time.";
+        return;
+      }
+
+      messageBox.style.color = "black";
+      messageBox.textContent = "Updating booking...";
+
+      try {
+        const response = await fetch(`/update-booking/${bookingId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ new_date, new_start, new_end })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          messageBox.style.color = "green";
+          messageBox.textContent = data.message || "Booking updated successfully!";
+          setTimeout(() => window.location.href = "/history", 1500);
+        } else {
+          messageBox.style.color = "red";
+          messageBox.textContent = data.detail || "Failed to update booking.";
+        }
+      } catch (error) {
+        messageBox.style.color = "red";
+        messageBox.textContent = "Network error. Please try again.";
+      }
     });
-  </script>
+  });
+</script>
 </body>
 </html>
