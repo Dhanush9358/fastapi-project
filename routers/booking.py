@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session, and_, or_
+from sqlalchemy.orm import Session
 from datetime import datetime, date, time, timedelta
 from typing import Optional
 
@@ -9,7 +9,6 @@ from database import get_db
 from models import Booking, User
 from auth import get_current_user
 from schemas import UpdateBooking
-import models
 
 
 router = APIRouter()
