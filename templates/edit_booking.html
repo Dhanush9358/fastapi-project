@@ -185,9 +185,12 @@
         if (response.ok) {
           if (data.available_rooms.length > 0) {
             availableRoomsContainer.style.color = "green";
-            const roomNumbers = data.available_rooms.map(item => 
-              typeof item === "object" ? item.room : item
-            );
+            const roomNumbers = data.available_rooms.map(item => {
+              if (typeof item === "object" && item.room_number) {
+                return item.room_number;
+              }
+              return item;
+            });
             availableRoomsContainer.textContent = `Available Rooms: ${roomNumbers.join(", ")}`;
 
             // Update dropdown with available rooms
