@@ -308,8 +308,8 @@ async def update_booking(
 
     # ✅ Validate time format and convert to time objects
     try:
-        start_time_obj = datetime.strptime(new_start, "%H:%M").time()
-        end_time_obj = datetime.strptime(new_end, "%H:%M").time()
+        start_time_obj = datetime.strptime(new_start, "%H:%M" if len(new_start) == 5 else "%H:%M:%S").time()
+        end_time_obj = datetime.strptime(new_start, "%H:%M" if len(new_start) == 5 else "%H:%M:%S").time()
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid time format. Use HH:MM")
 
@@ -319,10 +319,7 @@ async def update_booking(
 
     # ✅ Prevent booking in the past
     now = datetime.now()
-    today = now.date()
-    current_time = now.time()
-
-    if selected_date < today or (selected_date == today and start_time_obj <= current_time):
+    if selected_date < now.date() or (selected_date == now.date() and start_time_obj <= now.time()):
         raise HTTPException(status_code=400, detail="Cannot update booking to a past time")
 
     # ✅ Check for conflict with other bookings
