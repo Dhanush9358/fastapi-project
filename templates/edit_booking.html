@@ -99,9 +99,12 @@
       <label for="end_time">End Time:</label>
       <input type="time" id="end_time" name="end_time" value="{{ booking.end_time }}" required>
 
-      <div id="availableRooms" style="margin-top:10px; font-size:14px; color:#333;">
-        Available rooms will appear here.
-      </div>
+      <div id="availableRooms" style="margin:10px 0; font-weight:bold;"></div>
+
+      <label for="room">Select Room:</label>
+        <select id="room" name="room" required>
+            <option value="{{ booking.room }}">Current: {{ booking.room }}</option>
+        </select><br><br>
 
       <button type="submit">Update Booking</button>
     </form>
