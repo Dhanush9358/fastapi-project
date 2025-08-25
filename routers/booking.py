@@ -299,19 +299,18 @@ async def update_booking(
     new_date = details.new_date.strip()
     new_start = details.new_start.strip()
     new_end = details.new_end.strip()
+    new_room = getattr(details, "room", None)
+
+    if not new_room:
+        raise HTTPException(status_code=400, detail="Room selection is required")
 
     # ✅ Validate date format
     try:
         selected_date = datetime.strptime(new_date, "%Y-%m-%d").date()
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
-
-    # ✅ Validate time format and convert to time objects
-    try:
         start_time_obj = datetime.strptime(new_start, "%H:%M" if len(new_start) == 5 else "%H:%M:%S").time()
         end_time_obj = datetime.strptime(new_end, "%H:%M" if len(new_end) == 5 else "%H:%M:%S").time()
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid time format. Use HH:MM")
+        raise HTTPException(status_code=400, detail="Invalid date or time format")
 
     # ✅ Validate start < end
     if start_time_obj >= end_time_obj:
@@ -324,7 +323,7 @@ async def update_booking(
 
     # ✅ Check for conflict with other bookings
     conflict = db.query(Booking).filter(
-        Booking.room_number == booking.room_number,
+        Booking.room_number == new_room,
         Booking.date == new_date,
         Booking.id != booking_id,  # ✅ Exclude current booking
         (Booking.start_time < new_end) & (Booking.end_time > new_start)
@@ -340,6 +339,7 @@ async def update_booking(
     booking.date = new_date
     booking.start_time = new_start
     booking.end_time = new_end
+    booking.room_number = new_room
 
     db.commit()
     db.refresh(booking)
@@ -357,7 +357,7 @@ async def update_booking(
 
 
 @router.post("/available-rooms")
-async def available_rooms(details: UpdateBooking, db: Session = Depends(get_db)):
+async def available_rooms(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db)):
     # Extract details
     date = details.new_date.strip()
     start = details.new_start.strip()
@@ -374,6 +374,7 @@ async def available_rooms(details: UpdateBooking, db: Session = Depends(get_db))
     # Find booked rooms for that time slot
     booked_rooms = db.query(Booking.room_number).filter(
         Booking.date == date,
+        Booking.id != booking_id,
         (Booking.start_time < end) & (Booking.end_time > start)
     ).all()
 

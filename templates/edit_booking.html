@@ -81,6 +81,15 @@
     .back-link:hover {
       text-decoration: underline;
     }
+
+    #checkAvailabilityBtn {
+      margin-bottom: 15px;
+      background: #007bff;
+    }
+
+    #checkAvailabilityBtn:hover {
+      background: #0056b3;
+    }
   </style>
 </head>
 <body>
@@ -98,6 +107,8 @@
 
       <label for="end_time">End Time:</label>
       <input type="time" id="end_time" name="end_time" value="{{ booking.end_time }}" required>
+
+      <button type="button" id="checkAvailabilityBtn">Check Availability</button>
 
       <div id="availableRooms" style="margin:10px 0; font-weight:bold;"></div>
 
@@ -122,6 +133,7 @@
     const bookingId = document.getElementById("booking_id").value;
     const messageBox = document.getElementById("message");
     const roomSelect = document.getElementById("room");
+    const checkBtn = document.getElementById("checkAvailabilityBtn");
 
     const today = new Date().toISOString().split("T")[0];
     dateInput.min = today;
@@ -153,15 +165,13 @@
       const new_start = startInput.value;
       const new_end = endInput.value;
 
-      
-
       if (!new_date || !new_start || !new_end) {
         document.getElementById("availableRooms").textContent = "Please select date and time.";
         return;
       }
 
       try {
-        const response = await fetch("/available-rooms", {
+        const response = await fetch(`/available-rooms/${bookingId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ new_date, new_start, new_end })
@@ -197,9 +207,7 @@
       }
     }
 
-    dateInput.addEventListener("change", checkAvailability);
-    startInput.addEventListener("change", checkAvailability);
-    endInput.addEventListener("change", checkAvailability);
+    checkBtn.addEventListener("click", checkAvailability);
 
     // ✅ Submit form
     form.addEventListener("submit", async (e) => {
@@ -208,10 +216,11 @@
       const new_date = dateInput.value;
       const new_start = startInput.value;
       const new_end = endInput.value;
+      const selected_room = roomSelect.value;
 
       if (!new_date || !new_start || !new_end) {
         messageBox.style.color = "red";
-        messageBox.textContent = "Please fill all fields.";
+        messageBox.textContent = "Please fill all fields and select a room.";
         return;
       }
 
@@ -230,7 +239,7 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ new_date, new_start, new_end })
+          body: JSON.stringify({ new_date, new_start, new_end, room: selected_room })
         });
 
         const data = await response.json();
