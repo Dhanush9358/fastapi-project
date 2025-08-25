@@ -309,7 +309,7 @@ async def update_booking(
     # ✅ Validate time format and convert to time objects
     try:
         start_time_obj = datetime.strptime(new_start, "%H:%M" if len(new_start) == 5 else "%H:%M:%S").time()
-        end_time_obj = datetime.strptime(new_start, "%H:%M" if len(new_start) == 5 else "%H:%M:%S").time()
+        end_time_obj = datetime.strptime(new_end, "%H:%M" if len(new_end) == 5 else "%H:%M:%S").time()
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid time format. Use HH:MM")
 
