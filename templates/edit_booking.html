@@ -121,6 +121,7 @@
     const form = document.getElementById("editBookingForm");
     const bookingId = document.getElementById("booking_id").value;
     const messageBox = document.getElementById("message");
+    const roomSelect = document.getElementById("room");
 
     const today = new Date().toISOString().split("T")[0];
     dateInput.min = today;
@@ -152,11 +153,10 @@
       const new_start = startInput.value;
       const new_end = endInput.value;
 
-      const container = document.getElementById("availableRooms");
+      
 
       if (!new_date || !new_start || !new_end) {
-        container.style.color = "#555";
-        container.textContent = "Please select date and time.";
+        document.getElementById("availableRooms").textContent = "Please select date and time.";
         return;
       }
 
@@ -168,22 +168,32 @@
         });
 
         const data = await response.json();
+        const container = document.getElementById("availableRooms");
 
         if (response.ok) {
           if (data.available_rooms.length > 0) {
             container.style.color = "green";
             container.textContent = `Available Rooms: ${data.available_rooms.join(", ")}`;
+
+            // Update dropdown with available rooms
+            roomSelect.innerHTML = "";
+            data.available_rooms.forEach(room => {
+              const option = document.createElement("option");
+              option.value = room;
+              option.textContent = room;
+              roomSelect.appendChild(option);
+            });
           } else {
             container.style.color = "red";
             container.textContent = "No rooms available for the selected time.";
+            roomSelect.innerHTML = "<option value=''>No rooms available</option>";
           }
         } else {
           container.style.color = "red";
           container.textContent = data.detail || "Error checking availability.";
         }
       } catch (error) {
-        container.style.color = "red";
-        container.textContent = "Network error.";
+          document.getElementById("availableRooms").textContent = "Network error.";
       }
     }
 
