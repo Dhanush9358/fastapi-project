@@ -3,157 +3,14 @@
 <head>
     <title>Booking History</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7fc;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 0 20px 50px 20px;
-        }
-        h2 {
-            text-align: center;
-            color: #4CAF50;
-            margin-bottom: 40px;
-            font-size: 32px;
-        }
-
-        .search-form {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .search-form input, .search-form button {
-            padding: 8px;
-            font-size: 14px;
-            margin-right: 5px;
-        }
-        .search-form button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .search-form button:hover {
-            background-color: #45a049;
-            text-decoration: none;
-        }
-
-        .booking-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0px 6px 18px rgba(0,0,0,0.08);
-            padding: 25px 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .booking-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
-        }
-        .past-booking { background-color: #ffe5e5; }
-        .booking-info {
-            display: flex;
-            flex-direction: column;
-        }
-        .booking-info span {
-            margin: 4px 0;
-            font-size: 16px;
-        }
-        .room { font-weight: bold; color: #2196F3; }
-        .badge {
-            padding: 5px 12px;
-            border-radius: 14px;
-            color: #fff;
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 5px;
-            width: fit-content;
-            text-align: center;
-        }
-        .booking-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
-        .edit-btn {
-            background-color: #2196F3;
-            color: white;
-            padding: 8px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .edit-btn:hover { background-color: #0b7dda; }
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-            padding: 8px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .delete-btn:hover { background-color: #d32f2f; }
-        .cannot-edit { color: #777; font-size: 14px; }
-        .no-bookings {
-            text-align: center;
-            color: #777;
-            font-size: 18px;
-            margin-top: 50px;
-        }
-        .back-link-wrapper {
-            text-align: center;
-            margin-top: 40px;
-        }
-        .back-link {
-            display: inline-block;
-            text-decoration: none;
-            color: #fff;
-            background-color: #4CAF50;
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-        .back-link:hover { 
-            background-color: #45a049;
-            text-decoration: none;
-        }
-        @media (max-width: 600px) {
-            .booking-card {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .booking-actions {
-                width: 100%;
-                margin-top: 12px;
-            }
-            .edit-btn { width: 100%; }
-        }
-    </style>
 </head>
 <body>
 <div class="container">
-    <br>
     <h2>Your Bookings</h2>
-    </br>
-    {% if warning_message %}
-        <p style="color: red; text-align: center; font-weight: bold;">{{ warning }}</p>
-    {% endif %}
 
+    {% if warning_message %}
+        <p style="color: red; text-align: center; font-weight: bold;">{{ warning_message }}</p>
+    {% endif %}
 
     <form method="get" action="/history" class="search-form">
         <input type="date" name="date" value="{{ date }}" placeholder="Select Date">
@@ -161,13 +18,13 @@
         <input type="time" name="end_time" value="{{ end_time }}" placeholder="End Time">
         <button type="submit">Search</button>
     </form>
-    
+
     <div class="bookings-wrapper">
         {% if bookings %}
             {% for booking in bookings %}
-                <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}" 
-                    data-start="{{ booking.date }}T{{ booking.start_time }}"
-                    data-end="{{ booking.date }}T{{ booking.end_time }}">
+                <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}"
+                     data-start="{{ booking.date }}T{{ booking.start_time }}"
+                     data-end="{{ booking.date }}T{{ booking.end_time }}">
                     <div class="booking-info">
                         <span class="room">Room {{ booking.room_number }}</span>
                         <span>📅 {{ booking.date }}</span>
@@ -183,15 +40,9 @@
                     <div class="booking-actions">
                         {% if booking.can_edit %}
                             <a href="/edit_booking/{{ booking.id }}">
-                                <button class="edit-btn" id="edit-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="edit">Edit</button>
+                                <button class="edit-btn">Edit</button>
                             </a>
-                            <button class="delete-btn" 
-                                    data-booking-id="{{ booking.id }}" 
-                                    data-start-time="{{ booking.date }}T{{ booking.start_time }}" 
-                                    data-action="delete">
-                                Delete
-                            </button>
-
+                            <button class="delete-btn" data-booking-id="{{ booking.id }}">Delete</button>
                         {% endif %}
                     </div>
                 </div>
@@ -200,8 +51,8 @@
             <p class="no-bookings">No bookings found</p>
         {% endif %}
     </div>
-    
-    <div class="back-link-wrapper">
+
+    <div class="back-link-wrapper" style="text-align:center;">
         <a href="/book" class="back-link">Book Another Room</a>
     </div>
 </div>
@@ -210,7 +61,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     function updateBookingStatus() {
         const now = new Date();
-        const todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const todayStr = now.toISOString().split('T')[0];
         document.querySelectorAll(".booking-card").forEach(card => {
             const startTimeStr = card.getAttribute("data-start");
             const endTimeStr = card.getAttribute("data-end");
@@ -218,100 +69,55 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const startTime = new Date(startTimeStr);
             const endTime = new Date(endTimeStr);
-
-            const bookingDateStr = startTimeStr.split('T')[0]; // booking date
+            const bookingDateStr = startTimeStr.split('T')[0];
             const isToday = bookingDateStr === todayStr;
-
             const badge = card.querySelector(".badge");
             const editBtn = card.querySelector(".edit-btn");
             const deleteBtn = card.querySelector(".delete-btn");
 
-            // Reset old badge styles
             if (badge) badge.classList.remove("upcoming", "today", "past", "ongoing");
-            
 
             if (now < startTime) {
-                // Booking has not started yet → Upcoming
-                if (badge) {
-                    badge.innerText = isToday ? "Today" : "Upcoming";
-                    badge.classList.add(isToday ? "today" : "upcoming");
-                }
-
-                if ((startTime - now) > 30 * 60 * 1000) {
-                    if (editBtn) editBtn.style.display = "inline-block";
-                } else {
-                    if (editBtn) editBtn.style.display = "none";
-                }
-
-                // Hide Delete 1 hour before (Added)
-                if ((startTime - now) > 60 * 60 * 1000) {
-                    if (deleteBtn) deleteBtn.style.display = "inline-block";
-                } else {
-                    if (deleteBtn) deleteBtn.style.display = "none";
-                }
-
+                if (badge) { badge.innerText = isToday ? "Today" : "Upcoming"; badge.classList.add(isToday ? "today" : "upcoming"); }
+                if ((startTime - now) > 30 * 60 * 1000) { if (editBtn) editBtn.style.display = "inline-block"; } else { if (editBtn) editBtn.style.display = "none"; }
+                if ((startTime - now) > 60 * 60 * 1000) { if (deleteBtn) deleteBtn.style.display = "inline-block"; } else { if (deleteBtn) deleteBtn.style.display = "none"; }
             } else if (now >= startTime && now < endTime && isToday) {
-                // Booking is ongoing → Ongoing
-                if (badge) {
-                    badge.classList.add("ongoing");
-                    badge.innerText = "Ongoing";
-                }
+                if (badge) { badge.classList.add("ongoing"); badge.innerText = "Ongoing"; }
                 if (editBtn) editBtn.style.display = "none";
                 if (deleteBtn) deleteBtn.style.display = "none";
-
-                card.classList.remove("past-booking"); // no red
-                card.classList.add("ongoing-booking"); // optional highlight
-
+                card.classList.remove("past-booking"); card.classList.add("ongoing-booking");
             } else if (now >= endTime) {
-                // Booking ended → Past
-                if (badge) {
-                    badge.classList.add("past");
-                    badge.innerText = "Past";
-                }
+                if (badge) { badge.classList.add("past"); badge.innerText = "Past"; }
                 if (editBtn) editBtn.style.display = "none";
                 if (deleteBtn) deleteBtn.style.display = "none";
-
-                card.classList.add("past-booking");
-                card.classList.remove("ongoing-booking");
+                card.classList.add("past-booking"); card.classList.remove("ongoing-booking");
             }
         });
     }
 
-    // Initial run and check every 1s
     updateBookingStatus();
     setInterval(updateBookingStatus, 1000);
 
-    // ✅ Delete button logic
     document.querySelectorAll(".delete-btn").forEach(button => {
         button.addEventListener("click", function (e) {
             e.preventDefault();
             const bookingId = this.getAttribute("data-booking-id");
             if (!bookingId) return;
-
             if (!confirm("Are you sure you want to delete this booking?")) return;
 
-            fetch(`/delete-booking/${bookingId}`, {
-                method: "DELETE",
-                credentials: "include" 
-            })
+            fetch(`/delete-booking/${bookingId}`, { method: "DELETE", credentials: "include" })
             .then(response => {
                 if (response.ok) {
-                    // Remove card from DOM
                     this.closest(".booking-card").remove();
                 } else {
-                    console.error("Delete failed:", response);
                     alert("Failed to delete booking.");
                 }
-            })
-            .catch(err => {
-                console.error("Error:",err);
+            }).catch(err => {
                 alert("Error deleting booking.");
             });
         });
     });
 });
-
 </script>
 </body>
 </html>
-
