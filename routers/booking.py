@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import datetime, date, time, timedelta
-from typing import Optional, List
+from typing import Optional
 
 from database import get_db
 from models import Booking, User
@@ -143,16 +143,16 @@ def booking_history(
     start_time: Optional[str] = Query(None),
     end_time: Optional[str] = Query(None)
 ):
-    warning_message = None
     query = db.query(Booking).filter(Booking.user_id == current_user.id)
+    warning_message = None
 
     if (start_time or end_time) and not date:
         warning_message = "Please select a date when filtering by time."
-
-    if not warning_message and date:
+    elif date:
         try:
             filter_date = _parse_date(date)
             query = query.filter(Booking.date == filter_date)
+
             if start_time:
                 query = query.filter(Booking.start_time >= _parse_time(start_time))
             if end_time:
@@ -161,21 +161,20 @@ def booking_history(
             warning_message = "Invalid date or time format."
 
     bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
-
     now = datetime.now()
-    today_str = date.today().strftime("%Y-%m-%d")
-    booking_list = []
-    for b in bookings:
-        booking_end_dt = datetime.combine(b.date, b.end_time)
-        booking_list.append({
+
+    booking_list = [
+        {
             "id": b.id,
             "room_number": b.room_number,
             "date": b.date.strftime("%Y-%m-%d"),
             "start_time": b.start_time.strftime("%H:%M"),
             "end_time": b.end_time.strftime("%H:%M"),
-            "is_expired": now >= booking_end_dt,
-            "can_edit": now < booking_end_dt
-        })
+            "is_expired": now >= datetime.combine(b.date, b.end_time),
+            "can_edit": now < datetime.combine(b.date, b.end_time)
+        }
+        for b in bookings
+    ]
 
     return templates.TemplateResponse("history.html", {
         "request": request,
@@ -184,7 +183,7 @@ def booking_history(
         "date": date,
         "start_time": start_time,
         "end_time": end_time,
-        "current_date": today_str
+        "current_date": date.today().strftime("%Y-%m-%d")
     })
 
 # ----------------- Edit Booking -----------------
