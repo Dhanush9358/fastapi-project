@@ -350,7 +350,7 @@ async def update_booking(
 
 
 @router.post("/available-rooms/{booking_id}")
-async def available_rooms(booking_id: int, data: dict, details: UpdateBooking, db: Session = Depends(get_db)):
+async def available_rooms(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db)):
     date_str = details.new_date.strip()
     start = details.new_start.strip()
     end = details.new_end.strip()
