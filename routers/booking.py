@@ -139,19 +139,19 @@ def booking_history(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    date: Optional[str] = Query(None),
+    filter_date: Optional[str] = Query(None),
     start_time: Optional[str] = Query(None),
     end_time: Optional[str] = Query(None)
 ):
     query = db.query(Booking).filter(Booking.user_id == current_user.id)
     warning_message = None
 
-    if (start_time or end_time) and not date:
+    if (start_time or end_time) and not filter_date:
         warning_message = "Please select a date when filtering by time."
-    elif date:
+    elif filter_date:
         try:
-            filter_date = _parse_date(date)
-            query = query.filter(Booking.date == filter_date)
+            parsed_date = _parse_date(date)
+            query = query.filter(Booking.date == parsed_date)
 
             if start_time:
                 query = query.filter(Booking.start_time >= _parse_time(start_time))
@@ -180,7 +180,7 @@ def booking_history(
         "request": request,
         "bookings": booking_list,
         "warning_message": warning_message,
-        "date": date,
+        "date": filter_date,
         "start_time": start_time,
         "end_time": end_time,
         "current_date": date.today().strftime("%Y-%m-%d")
