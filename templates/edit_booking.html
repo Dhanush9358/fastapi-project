@@ -100,7 +100,7 @@
       <input type="hidden" id="booking_id" value="{{ booking.id }}">
 
       <label for="date">Date:</label>
-      <input type="date" id="date" name="date" value="{{ booking.date.strftime('%Y-%m-%d') }}" required>
+      <input type="date" id="new_date" name="new_date" value="{{ booking.date.strftime('%Y-%m-%d') }}" required>
 
       <label for="start_time">Start Time:</label>
       <input type="time" id="start_time" name="start_time" value="{{ booking.start_time }}" required>
