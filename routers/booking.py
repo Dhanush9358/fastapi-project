@@ -303,12 +303,32 @@ async def update_booking(
     if not new_room:
         raise HTTPException(status_code=400, detail="Room selection is required")
 
-    try:
-        selected_date = datetime.strptime(new_date, "%Y-%m-%d").date()
-        start_time_obj = datetime.strptime(new_start, "%H:%M").time()
-        end_time_obj = datetime.strptime(new_end, "%H:%M").time()
-    except ValueError:
+    def parse_date(value) -> date:
+        if isinstance(value, date):
+            return value
+        s = str(value).strip()
+        for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d"):
+            try:
+                return datetime.strptime(s, fmt).date()
+            except ValueError:
+                continue
         raise HTTPException(status_code=400, detail="Invalid date or time format")
+
+    def parse_time(value) -> time:
+        if isinstance(value, time):
+            return value
+        s = str(value).strip()
+        for fmt in ("%H:%M", "%H:%M:%S"):
+            try:
+                return datetime.strptime(s, fmt).time()
+            except ValueError:
+                continue
+        raise HTTPException(status_code=400, detail="Invalid date or time format")
+
+    # ✅ Use these
+    selected_date = parse_date(new_date)
+    start_time_obj = parse_time(new_start)
+    end_time_obj = parse_time(new_end)
 
     if start_time_obj >= end_time_obj:
         raise HTTPException(status_code=400, detail="Start time must be before end time")
