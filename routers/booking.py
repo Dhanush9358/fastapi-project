@@ -351,32 +351,51 @@ async def update_booking(
 
 @router.post("/available-rooms/{booking_id}")
 async def available_rooms(booking_id: int, details: UpdateBooking, db: Session = Depends(get_db)):
-    date_str = details.new_date.strip()
-    start = details.new_start.strip()
-    end = details.new_end.strip()
+    # --- helpers that accept multiple formats ---
+    def parse_date(value) -> date:
+        if isinstance(value, date):
+            return value
+        s = str(value).strip()
+        for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d"):
+            try:
+                return datetime.strptime(s, fmt).date()
+            except ValueError:
+                continue
+        raise HTTPException(status_code=400, detail="Invalid date or time format")
 
-    # Validate input
-    try:
-        datetime.strptime(date_str, "%Y-%m-%d")
-        datetime.strptime(start, "%H:%M")
-        datetime.strptime(end, "%H:%M")
-    except ValueError:
+    def parse_time(value) -> time:
+        if isinstance(value, time):
+            return value
+        s = str(value).strip()
+        for fmt in ("%H:%M", "%H:%M:%S"):
+            try:
+                return datetime.strptime(s, fmt).time()
+            except ValueError:
+                continue
         raise HTTPException(status_code=400, detail="Invalid date or time format")
     
+    date_str = parse_date(details.new_date)
+    start  = parse_time(details.new_start)
+    end    = parse_time(details.new_end)
+
     if start >= end:
         raise HTTPException(status_code=400, detail="End time must be after start time")
 
     # Find booked rooms for that time slot (excluding current booking)
-    booked_rooms = db.query(Booking.room_number).filter(
-        Booking.date == date_str,
-        Booking.id != booking_id,
-        (Booking.start_time < end) & (Booking.end_time > start)
-    ).all()
-
-    booked_rooms = [room[0] for room in booked_rooms]
+    booked_rooms = (
+        db.query(Booking.room_number)
+        .filter(
+            Booking.date == date_str,
+            Booking.id != booking_id,
+            Booking.start_time < end,
+            Booking.end_time > start,
+        )
+        .all()
+    )
+    booked_rooms = [r[0] for r in booked_rooms]
 
     # Fetch all rooms and exclude booked ones
-    all_rooms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # Replace with DB query if rooms stored in DB
+    all_rooms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # replace with DB query if needed
     available_rooms = [r for r in all_rooms if r not in booked_rooms]
 
     return {"available_rooms": available_rooms}

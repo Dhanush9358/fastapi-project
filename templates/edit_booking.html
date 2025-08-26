@@ -140,6 +140,8 @@
     const today = new Date().toISOString().split("T")[0];
     dateInput.min = today;
 
+    const hhmm = v => (v || "").slice(0, 5);
+
     const setMinStartTime = () => {
       if (dateInput.value === today) {
         const now = new Date();
@@ -152,7 +154,7 @@
     };
 
     const setMinEndTime = () => {
-      endInput.min = startInput.value;
+      endInput.min = hhmm(startInput.value);
     };
 
     dateInput.addEventListener("change", setMinStartTime);
@@ -164,8 +166,8 @@
     // ✅ Availability Check Logic
     async function checkAvailability() {
       const new_date = dateInput.value;
-      const new_start = startInput.value;
-      const new_end = endInput.value;
+      const new_start = hhmm(startInput.value);
+      const new_end = hhmm(endInput.value);
 
       if (!new_date || !new_start || !new_end) {
         availableRoomsContainer.style.color = "red";
@@ -212,10 +214,14 @@
                 roomSelect.appendChild(option);
               }
             });
+
+            // optional: make dropdown scroll when many options
+            roomSelect.size = Math.min(6, roomSelect.options.length); // shows up to 6 rows
           } else {
             availableRoomsContainer.style.color = "red";
             availableRoomsContainer.textContent = "No rooms available for the selected time.";
             roomSelect.innerHTML = "<option value=''>No rooms available</option>";
+            roomSelect.size = 1;
           }
         } else {
           availableRoomsContainer.style.color = "red";
@@ -224,9 +230,9 @@
       } catch (error) {
         availableRoomsContainer.style.color = "red";
         availableRoomsContainer.textContent = "Network error.";
-
       }
     }
+          
 
     // ✅ Trigger check on button click
     checkBtn.addEventListener("click", checkAvailability);
