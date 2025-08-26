@@ -5,14 +5,14 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<div class="container">
+<div class="container-history">
     <h2>Your Bookings</h2>
 
     {% if warning_message %}
         <p style="color: red; text-align: center; font-weight: bold;">{{ warning_message }}</p>
     {% endif %}
 
-    <form method="get" action="/history" class="search-form">
+    <form method="get" action="/history" class="search-form-history">
         <input type="date" name="date" value="{{ date }}" placeholder="Select Date">
         <input type="time" name="start_time" value="{{ start_time }}" placeholder="Start Time">
         <input type="time" name="end_time" value="{{ end_time }}" placeholder="End Time">
@@ -22,11 +22,11 @@
     <div class="bookings-wrapper">
         {% if bookings %}
             {% for booking in bookings %}
-                <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}"
+                <div class="booking-card-history {% if booking.is_expired %}past-booking-history{% endif %}"
                      data-start="{{ booking.date }}T{{ booking.start_time }}"
                      data-end="{{ booking.date }}T{{ booking.end_time }}">
-                    <div class="booking-info">
-                        <span class="room">Room {{ booking.room_number }}</span>
+                    <div class="booking-info-history">
+                        <span class="room-history">Room {{ booking.room_number }}</span>
                         <span>📅 {{ booking.date }}</span>
                         <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
                         {% if booking.is_expired %}
@@ -37,23 +37,23 @@
                             <span class="badge upcoming">Upcoming</span>
                         {% endif %}
                     </div>
-                    <div class="booking-actions">
+                    <div class="booking-actions-history">
                         {% if booking.can_edit %}
                             <a href="/edit_booking/{{ booking.id }}">
-                                <button class="edit-btn">Edit</button>
+                                <button class="edit-btn-history">Edit</button>
                             </a>
-                            <button class="delete-btn" data-booking-id="{{ booking.id }}">Delete</button>
+                            <button class="delete-btn-history" data-booking-id="{{ booking.id }}">Delete</button>
                         {% endif %}
                     </div>
                 </div>
             {% endfor %}
         {% else %}
-            <p class="no-bookings">No bookings found</p>
+            <p class="no-bookings-history">No bookings found</p>
         {% endif %}
     </div>
 
-    <div class="back-link-wrapper" style="text-align:center;">
-        <a href="/book" class="back-link">Book Another Room</a>
+    <div class="back-link-wrapper-history" style="text-align:center;">
+        <a href="/book" class="back-link-history">Book Another Room</a>
     </div>
 </div>
 
