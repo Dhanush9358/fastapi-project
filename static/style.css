@@ -561,7 +561,13 @@ a:hover,
 .edit-btn { background-color:#2196F3; color:white; padding:8px 18px; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
 .delete-btn { background-color:#f44336; color:white; padding:8px 18px; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
 .no-bookings { text-align:center; color:#777; font-size:18px; margin-top:50px; }
-.back-link { display:inline-block; padding:12px 28px; border-radius:8px; background-color:#4CAF50; color:#fff; text-decoration:none; }
+/* .back-link { display:inline-block; padding:12px 28px; border-radius:8px; background-color:#4CAF50; color:#fff; text-decoration:none; } */
 
 /* small util */
 .hidden { display:none; }
+
+
+.back-link {
+  text-align: center;
+  margin-top: 1.5em;
+}
