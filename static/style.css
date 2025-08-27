@@ -1,13 +1,12 @@
-/* Body Styling */
+/* ================= GLOBAL STYLES ================= */
 body {
   font-family: Arial, sans-serif;
   background: #f4f4f4;
-  padding: 2em;
   margin: 0;
+  padding: 2em;
   text-align: center;
 }
 
-/* Centered Container */
 .container {
   max-width: 450px;
   margin: auto;
@@ -18,24 +17,16 @@ body {
   text-align: left;
 }
 
-.container h2,
-h1 {
+h1, .container h2 {
   text-align: center;
   margin-bottom: 1.5em;
   color: #333;
 }
 
-/* Form Styling */
-form,
-form.form-styled {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
 label {
   font-weight: bold;
   margin-bottom: 5px;
+  color: #444;
 }
 
 input[type="text"],
@@ -52,54 +43,47 @@ input[type="time"] {
   border-radius: 6px;
 }
 
-/* Input & Button Focus Styles (Accessibility) */
-input:focus,
-button:focus {
-  outline: 2px solid #0052cc;
-  box-shadow: 0 0 3px #0052cc;
+input:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
-/* Buttons */
+
+/* ----------Buttons---------- */
 button {
   height: 45px;
   font-size: 16px;
   background-color: #333;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s ease;
   padding: 0 20px;
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
 }
 
-
+button:hover {
+  background-color: #555;
+}
 
 .btn {
   display: inline-block;
   margin: 1em;
-  padding: 8px 20px;
-  background-color: #222;
-  color: white;
+  padding: 1em 2em;
+  background-color: #333;
+  color: #fff;
   text-decoration: none;
   border-radius: 10px;
-  font-size: 15px;
-  font-weight: normal;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-size: 18px;
+  transition: background-color 0.3s;
 }
 
-
-
-button:hover,
 .btn:hover {
   background-color: #555;
 }
 
-/* Logout Link */
+
+/* ----------Logout Link----------*/
 .logout-link {
   position: fixed;
   top: 10px;
@@ -111,24 +95,7 @@ button:hover,
   z-index: 999;
 }
 
-
-/* Generic Link */
-a,
-.back-link {
-  display: block;
-  text-align: center;
-  margin-top: 1.5em;
-  color: #0066cc;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-a:hover,
-.back-link:hover {
-  text-decoration: underline;
-}
-
-/* Message Boxes */
+/* ----------Message Boxes---------- */
 .message {
   padding: 10px;
   margin: 10px 0;
@@ -140,12 +107,10 @@ a:hover,
 
 .message.success {
   color: green;
-  background-color: #ffffff;
 }
 
 .message.error {
   color: red;
-  background-color: #ffffff;
 }
 
 .error-message {
@@ -155,119 +120,228 @@ a:hover,
   margin-top: 20px;
 }
 
-
-/* Optional hidden class for JS toggling */
 .hidden {
   display: none;
 }
 
-/* Links Section */
-.links {
-  text-align: center;
-  margin-top: 1.5em;
+/* ================= EDIT BOOKING PAGE ================= */
+.edit-container {
+  max-width: 400px;
+  margin: 50px auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.links a {
-  display: block;
-  margin-top: 0.5em;
-  color: #0066cc;
-  text-decoration: none;
+.edit-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.edit-container button {
+  width: 100%;
+}
+
+#checkAvailabilityBtn {
+  margin-bottom: 15px;
+  background: #007bff;
+}
+
+#checkAvailabilityBtn:hover {
+  background: #0056b3;
+}
+
+#message {
+  text-align: center;
+  margin-top: 15px;
   font-weight: bold;
 }
 
-.links a:hover {
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.back-link:hover {
   text-decoration: underline;
 }
 
-/* Booking History */
-.history-container ul {
-  list-style: none;
-  padding: 0;
+#availableRooms {
+  margin: 10px 0;
+  font-weight: bold;
 }
 
-.history-container li {
-  padding: 10px 0;
-  border-bottom: 1px solid #ccc;
-  line-height: 1.5;
+/* ================= HISTORY PAGE ================= */
+.history-container {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 0 20px 50px 20px;
 }
 
-/* Forgot Page Specific */
-.credentials {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  font-family: Arial, sans-serif;
-}
-
-.credentials pre {
-  background-color: #eee;
-  padding: 10px;
-  border-radius: 5px;
-  font-size: 0.9em;
-  font-family: Consolas, monospace;
-  margin: 5px 0 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-
-
-
-
-/* Home/index page styling */
-.centered-page {
-  font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+.history-container h2 {
   text-align: center;
-  padding: 3em;
+  color: #4CAF50;
+  margin-bottom: 40px;
+  font-size: 32px;
 }
 
-.centered-page h1 {
-  font-size: 36px;
-  color: #333;
-  margin-bottom: 1em;
+.search-form {
+  text-align: center;
+  margin-bottom: 25px;
 }
 
-.btn {
-      display: inline-block;
-      margin: 1em;
-      padding: 1em 2em;
-      background-color: #333;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 10px;
-      font-size: 18px;
-      transition: background-color 0.3s;
+.search-form input,
+.search-form button {
+  padding: 8px;
+  font-size: 14px;
+  margin-right: 5px;
 }
 
+.search-form button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
 
-/* Responsive Adjustments */
-@media (max-width: 480px) {
-  .container,
-  .history-container {
-    padding: 1em;
-    border-radius: 6px;
-  }
+.search-form button:hover {
+  background-color: #45a049;
+}
 
-  input,
-  button {
-    font-size: 15px;
-    height: 40px;
-  }
+.booking-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 18px rgba(0,0,0,0.08);
+  padding: 25px 20px;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
 
-  .btn {
-    padding: 0.8em 1.5em;
-    font-size: 16px;
-  }
+.booking-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
 }
 
 .past-booking {
   background-color: #ffe5e5;
 }
 
-.ongoing-booking { background-color: #e6f0ff; } /* light blue card bg */
+.booking-info {
+  display: flex;
+  flex-direction: column;
+}
 
+.booking-info span {
+  margin: 4px 0;
+  font-size: 16px;
+}
 
+.room {
+  font-weight: bold;
+  color: #2196F3;
+}
 
+.badge {
+  padding: 5px 12px;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+  margin-top: 5px;
+  width: fit-content;
+  text-align: center;
+}
+
+.booking-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.edit-btn {
+  background-color: #2196F3;
+  color: white;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.edit-btn:hover {
+  background-color: #0b7dda;
+}
+
+.delete-btn {
+  background-color: #f44336;
+  color: white;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f;
+}
+
+.no-bookings {
+  text-align: center;
+  color: #777;
+  font-size: 18px;
+  margin-top: 50px;
+}
+
+.back-link-wrapper {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.back-link-wrapper .back-link {
+  display: inline-block;
+  text-decoration: none;
+  color: #fff;
+  background-color: #4CAF50;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.back-link-wrapper .back-link:hover {
+  background-color: #45a049;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .booking-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .booking-actions {
+    width: 100%;
+    margin-top: 12px;
+  }
+  .edit-btn {
+    width: 100%;
+  }
+}
+
+/* Status-specific colors */
+.badge.upcoming { background-color: #28a745; }
+.badge.today { background-color: #ff9500; }
+.badge.ongoing { background-color: #e4bb18; }
+.badge.past { background-color: #dc3545; }

@@ -3,201 +3,9 @@
 <head>
     <title>Booking History</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7fc;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container-history {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 0 20px 50px 20px;
-        }
-        h2 {
-            text-align: center;
-            color: #4CAF50;
-            margin-bottom: 40px;
-            font-size: 32px;
-        }
-
-        .search-form-history {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .search-form-history input, .search-form-history button {
-            padding: 8px;
-            font-size: 14px;
-            margin-right: 5px;
-        }
-        .search-form-history button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .search-form-history button:hover {
-            background-color: #45a049;
-            text-decoration: none;
-        }
-
-        .bookings-wrapper-history {
-            max-height: 600px;   /* adjust as needed */
-            overflow-y: auto;
-            padding-right: 10px;
-            margin-bottom: 20px;
-        }
-
-        /* Optional: make scrollbar nice */
-        .bookings-wrapper-history::-webkit-scrollbar {
-            width: 8px;
-        }
-        .bookings-wrapper-history::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
-        .bookings-wrapper-history::-webkit-scrollbar-thumb:hover {
-            background: #999;
-        }
-        /* Booking list styles */
-        .booking-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .booking-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid #ccc;
-            line-height: 1.5;
-        }
-
-        input:focus,
-        button:focus {
-            outline: 2px solid #0052cc;
-            box-shadow: 0 0 3px #0052cc;
-        }
-
-        .booking-card-history {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0px 6px 18px rgba(0,0,0,0.08);
-            padding: 25px 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .booking-card-history:hover {
-            transform: translateY(-4px);
-            box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
-        }
-        .past-booking-history { background-color: #ffe5e5; }
-        .booking-info-history {
-            display: flex;
-            flex-direction: column;
-        }
-        .booking-info-history span {
-            margin: 4px 0;
-            font-size: 16px;
-        }
-        .room-history { font-weight: bold; color: #2196F3; }
-        .badge {
-            padding: 5px 12px;
-            border-radius: 14px;
-            color: #fff;
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 5px;
-            width: fit-content;
-            text-align: center;
-        }
-        .booking-actions-hisory {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
-        .edit-btn-history {
-            background-color: #2196F3;
-            color: white;
-            padding: 8px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .edit-btn-history:hover { background-color: #0b7dda; }
-        .delete-btn-history {
-            background-color: #f44336;
-            color: white;
-            padding: 8px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .delete-btn-history:hover { background-color: #d32f2f; }
-        .cannot-edit-history { color: #777; font-size: 14px; }
-        .no-bookings-history {
-            text-align: center;
-            color: #777;
-            font-size: 18px;
-            margin-top: 50px;
-        }
-        .back-link-wrapper-history {
-            text-align: center;
-            margin-top: 40px;
-        }
-        .back-link-history {
-            display: inline-block;
-            text-decoration: none;
-            color: #fff;
-            background-color: #4CAF50;
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-        .back-link-history:hover { 
-            background-color: #45a049;
-            text-decoration: none;
-        }
-        @media (max-width: 600px) {
-            .booking-card-history {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .booking-actions-hisory {
-                width: 100%;
-                margin-top: 12px;
-            }
-            .edit-btn-history { width: 100%; }
-        }
-        .badge.upcoming-history {
-            background-color: #28a745; /* Blue for future bookings */
-        }
-
-        .badge.today-history {
-            background-color: #ff9500; /* Cyan for today's future bookings */
-        }
-
-        .badge.ongoing-history {
-            background-color: #e4bb18; /* Green for ongoing bookings */
-        }
-
-        .badge.past-history {
-            background-color: #dc3545; /* Red for past bookings */
-        }
-    </style>
 </head>
 <body>
-<div class="container-history">
+<div class="container">
     <br>
     <h2>Your Bookings</h2>
     </br>
@@ -206,37 +14,37 @@
     {% endif %}
 
 
-    <form method="get" action="/history" class="search-form-history">
+    <form method="get" action="/history" class="search-form">
         <input type="date" name="date" value="{{ date }}" placeholder="Select Date">
         <input type="time" name="start_time" value="{{ start_time }}" placeholder="Start Time">
         <input type="time" name="end_time" value="{{ end_time }}" placeholder="End Time">
         <button type="submit">Search</button>
     </form>
     
-    <div class="bookings-wrapper-history">
+    <div class="bookings-wrapper">
         {% if bookings %}
             {% for booking in bookings %}
-                <div class="booking-card-history {% if booking.is_expired %}past-booking-history{% endif %}" 
+                <div class="booking-card {% if booking.is_expired %}past-booking{% endif %}" 
                     data-start="{{ booking.date }}T{{ booking.start_time }}"
                     data-end="{{ booking.date }}T{{ booking.end_time }}">
-                    <div class="booking-info-history">
-                        <span class="room-history">Room {{ booking.room_number }}</span>
+                    <div class="booking-info">
+                        <span class="room">Room {{ booking.room_number }}</span>
                         <span>📅 {{ booking.date }}</span>
                         <span>⏰ {{ booking.start_time }} to {{ booking.end_time }}</span>
                         {% if booking.is_expired %}
-                            <span class="badge past-history">Past</span>
+                            <span class="badge past">Past</span>
                         {% elif booking.date == current_date %}
-                            <span class="badge today-history">Today</span>
+                            <span class="badge today">Today</span>
                         {% else %}
-                            <span class="badge upcoming-history">Upcoming</span>
+                            <span class="badge upcoming">Upcoming</span>
                         {% endif %}
                     </div>
-                    <div class="booking-actions-hisory">
+                    <div class="booking-actions">
                         {% if booking.can_edit %}
                             <a href="/edit_booking/{{ booking.id }}">
-                                <button class="edit-btn-history" id="edit-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="edit">Edit</button>
+                                <button class="edit-btn" id="edit-btn-{{ booking.id }}" data-start-time="{{ booking.date }}T{{ booking.start_time }}" data-action="edit">Edit</button>
                             </a>
-                            <button class="delete-btn-history" 
+                            <button class="delete-btn" 
                                     data-booking-id="{{ booking.id }}" 
                                     data-start-time="{{ booking.date }}T{{ booking.start_time }}" 
                                     data-action="delete">
@@ -248,12 +56,12 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p class="no-bookings-history">No bookings found</p>
+            <p class="no-bookings">No bookings found</p>
         {% endif %}
     </div>
     
-    <div class="back-link-wrapper-history">
-        <a href="/book" class="back-link-history">Book Another Room</a>
+    <div class="back-link-wrapper">
+        <a href="/book" class="back-link">Book Another Room</a>
     </div>
 </div>
 
