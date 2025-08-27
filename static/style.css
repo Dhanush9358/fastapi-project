@@ -212,17 +212,7 @@ a:hover,
   word-wrap: break-word;
 }
 
-/* Booking list styles */
-.booking-list {
-  list-style: none;
-  padding: 0;
-}
 
-.booking-list li {
-  padding: 10px 0;
-  border-bottom: 1px solid #ccc;
-  line-height: 1.5;
-}
 
 
 
@@ -277,7 +267,6 @@ a:hover,
   background-color: #ffe5e5;
 }
 
-.badge.ongoing { background-color: #ff8c00; } /* blue ongoing */
 .ongoing-booking { background-color: #e6f0ff; } /* light blue card bg */
 
 
