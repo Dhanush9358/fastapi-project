@@ -38,7 +38,28 @@
     <a href="/history">View Booking History</a>
   </div>
 
-  <!-- centralized JS -->
-  <script src="/static/script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const dateInput = document.getElementById("date");
+      const startInput = document.getElementById("start_time");
+
+      const setMinStartTime = () => {
+        const today = new Date().toISOString().split("T")[0];
+        const selectedDate = dateInput.value;
+
+        if (selectedDate === today) {
+          const now = new Date();
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          startInput.min = `${hours}:${minutes}`;
+        } else {
+          startInput.removeAttribute("min");
+        }
+      };
+
+      dateInput.addEventListener("change", setMinStartTime);
+      setMinStartTime(); // Initial trigger on load
+    });
+  </script>
 </body>
 </html>

@@ -8,7 +8,7 @@
   <div class="container">
     <h2>📝 Register</h2>
 
-    <form method="POST" action="/register" class="form-styled">
+    <form method="POST" action="/register" class="form-styled" onsubmit="return validateForm()">
       <label for="username">Username:</label>
       <input type="text" id="username" name="username" required>
 
@@ -30,6 +30,29 @@
     </div>
   </div>
 
-  <script src="/static/script.js"></script>
+  <script>
+    function validateForm() {
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email.endsWith("@gmail.com")) {
+        alert("Email must end with @gmail.com");
+        return false;
+      }
+
+      if (password.length < 8) {
+        alert("Password must be at least 8 characters");
+        return false;
+      }
+
+      if (username.length < 6) {
+        alert("Username must be at least 6 characters");
+        return false;
+      }
+
+      return true;
+    }
+  </script>
 </body>
 </html>

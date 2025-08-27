@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from database import Base
 
 class User(Base):
@@ -25,3 +26,5 @@ class Booking(Base):
     end_time = Column(Time, nullable=False)
 
     user = relationship("User", back_populates="bookings")
+
+

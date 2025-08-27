@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from database import Base, engine
 from routers import booking, user
 
-# Ensure tables exist
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
