@@ -224,24 +224,7 @@ a:hover,
   line-height: 1.5;
 }
 
-.bookings-wrapper {
-    max-height: 600px;   /* adjust as needed */
-    overflow-y: auto;
-    padding-right: 10px;
-    margin-bottom: 20px;
-}
 
-/* Optional: make scrollbar nice */
-.bookings-wrapper::-webkit-scrollbar {
-    width: 8px;
-}
-.bookings-wrapper::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
-}
-.bookings-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #999;
-}
 
 /* Home/index page styling */
 .centered-page {
@@ -297,20 +280,5 @@ a:hover,
 .badge.ongoing { background-color: #ff8c00; } /* blue ongoing */
 .ongoing-booking { background-color: #e6f0ff; } /* light blue card bg */
 
-/* Status-specific colors */
-.badge.upcoming {
-    background-color: #28a745; /* Blue for future bookings */
-}
 
-.badge.today {
-    background-color: #ff9500; /* Cyan for today's future bookings */
-}
-
-.badge.ongoing {
-    background-color: #e4bb18; /* Green for ongoing bookings */
-}
-
-.badge.past {
-    background-color: #dc3545; /* Red for past bookings */
-}
 
