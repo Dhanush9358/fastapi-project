@@ -20,5 +20,18 @@
 
     <a href="/login" class="back-link">Login</a>
   </div>
+
+  <script>
+    function validateForm() {
+      const email = document.getElementById("email").value.trim();
+
+      if (!email.endsWith("@gmail.com")) {
+        alert("Email must end with @gmail.com");
+        return false;
+      }
+
+      return true;
+    }
+  </script>
 </body>
 </html>
