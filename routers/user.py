@@ -97,6 +97,7 @@ async def forgot_post(
     email: EmailStr = Form(...),
     db: Session = Depends(get_db)
 ):
+    email = str(email)
     # ✅ Check if email ends with @gmail.com
     if not email.endswith("@gmail.com"):
         return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Email must end with @gmail.com"})
