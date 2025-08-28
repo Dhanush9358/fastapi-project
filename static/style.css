@@ -1,35 +1,33 @@
-/* =============================
-   GLOBAL STYLES
-============================= */
+/* Body Styling */
 body {
   font-family: Arial, sans-serif;
   background: #f4f4f4;
+  padding: 2em;
   margin: 0;
-  padding: 0;
-}
-
-/* =============================
-   CONTAINERS
-============================= */
-.container {
-  max-width: 900px;
-  margin: 50px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.container h2 {
   text-align: center;
-  color: #333;
-  margin-bottom: 20px;
 }
 
-/* =============================
-   FORMS & INPUTS
-============================= */
-form {
+/* Centered Container */
+.container {
+  max-width: 450px;
+  margin: auto;
+  background-color: white;
+  padding: 2em;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.container h2,
+h1 {
+  text-align: center;
+  margin-bottom: 1.5em;
+  color: #333;
+}
+
+/* Form Styling */
+form,
+form.form-styled {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -37,207 +35,282 @@ form {
 
 label {
   font-weight: bold;
-  color: #444;
+  margin-bottom: 5px;
 }
 
-input[type="date"],
-input[type="time"],
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="date"],
+input[type="time"] {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-input:focus {
-  border-color: #007bff;
-  outline: none;
-}
-
-/* =============================
-   BUTTONS
-============================= */
-button {
-  width: 100%;
-  padding: 12px;
-  background: #000;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  height: 45px;
+  padding: 8px 12px;
   font-size: 16px;
-  cursor: pointer;
-  transition: background 0.3s;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-button:hover {
-  background: #555;
+/* Input & Button Focus Styles (Accessibility) */
+input:focus,
+button:focus {
+  outline: 2px solid #0052cc;
+  box-shadow: 0 0 3px #0052cc;
 }
 
-/* Special Button for Check Availability */
-#checkAvailabilityBtn {
-  background: #007bff;
-  margin-bottom: 15px;
-}
-
-#checkAvailabilityBtn:hover {
-  background: #0056b3;
-}
-
-/* =============================
-   EDIT BOOKING SPECIFIC
-============================= */
-.edit-container {
-  max-width: 400px;
-}
-
-.update-message {
-  text-align: center;
-  margin-top: 15px;
-  font-weight: bold;
-}
-
-.available-rooms {
-  margin: 10px 0;
-  font-weight: bold;
-}
-
-/* =============================
-   HISTORY PAGE
-============================= */
-.search-form {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.search-form input,
-.search-form button {
-  padding: 8px;
-  font-size: 14px;
-  margin-right: 5px;
-}
-
-.search-form button {
-  background-color: #4CAF50;
+/* Buttons */
+button {
+  height: 45px;
+  font-size: 16px;
+  background-color: #333;
   color: white;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 0 20px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+
+
+.btn {
+  display: inline-block;
+  margin: 1em;
+  padding: 8px 20px;
+  background-color: #222;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: normal;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+
+button:hover,
+.btn:hover {
+  background-color: #555;
+}
+
+/* Logout Link */
+.logout-link {
+  position: fixed;
+  top: 10px;
+  right: 20px;
+  color: red;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 999;
+}
+
+
+/* Generic Link */
+a,
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 1.5em;
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover,
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Message Boxes */
+.message {
+  padding: 10px;
+  margin: 10px 0;
   border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #f4f4f4;
 }
 
-.search-form button:hover {
-  background-color: #45a049;
+.message.success {
+  color: green;
+  background-color: #ffffff;
 }
 
-/* Booking cards */
-.booking-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0px 6px 18px rgba(0,0,0,0.08);
-  padding: 25px 20px;
-  margin-bottom: 25px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+.message.error {
+  color: red;
+  background-color: #ffffff;
 }
 
-.booking-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
+.error-message {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+}
+
+
+/* Optional hidden class for JS toggling */
+.hidden {
+  display: none;
+}
+
+/* Links Section */
+.links {
+  text-align: center;
+  margin-top: 1.5em;
+}
+
+.links a {
+  display: block;
+  margin-top: 0.5em;
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+/* Booking History */
+.history-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.history-container li {
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  line-height: 1.5;
+}
+
+/* Forgot Page Specific */
+.credentials {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+}
+
+.credentials pre {
+  background-color: #eee;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  font-family: Consolas, monospace;
+  margin: 5px 0 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Booking list styles */
+.booking-list {
+  list-style: none;
+  padding: 0;
+}
+
+.booking-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  line-height: 1.5;
+}
+
+.bookings-wrapper {
+    max-height: 600px;   /* adjust as needed */
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-bottom: 20px;
+}
+
+/* Optional: make scrollbar nice */
+.bookings-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+.bookings-wrapper::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+.bookings-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Home/index page styling */
+.centered-page {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  text-align: center;
+  padding: 3em;
+}
+
+.centered-page h1 {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 1em;
+}
+
+.btn {
+      display: inline-block;
+      margin: 1em;
+      padding: 1em 2em;
+      background-color: #333;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 18px;
+      transition: background-color 0.3s;
+}
+
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+  .container,
+  .history-container {
+    padding: 1em;
+    border-radius: 6px;
+  }
+
+  input,
+  button {
+    font-size: 15px;
+    height: 40px;
+  }
+
+  .btn {
+    padding: 0.8em 1.5em;
+    font-size: 16px;
+  }
 }
 
 .past-booking {
   background-color: #ffe5e5;
 }
 
-.booking-info span {
-  margin: 4px 0;
-  font-size: 16px;
+.badge.ongoing { background-color: #ff8c00; } /* blue ongoing */
+.ongoing-booking { background-color: #e6f0ff; } /* light blue card bg */
+
+/* Status-specific colors */
+.badge.upcoming {
+    background-color: #28a745; /* Blue for future bookings */
 }
 
-.room {
-  font-weight: bold;
-  color: #2196F3;
+.badge.today {
+    background-color: #ff9500; /* Cyan for today's future bookings */
 }
 
-/* Badge styles */
-.badge {
-  padding: 5px 12px;
-  border-radius: 14px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: bold;
-  margin-top: 5px;
-  width: fit-content;
-  text-align: center;
+.badge.ongoing {
+    background-color: #e4bb18; /* Green for ongoing bookings */
 }
 
-.badge.upcoming { background-color: #28a745; }
-.badge.today { background-color: #ff9500; }
-.badge.ongoing { background-color: #e4bb18; }
-.badge.past { background-color: #dc3545; }
-
-/* Buttons inside booking cards */
-.edit-btn {
-  background-color: #2196F3;
-  color: white;
-  padding: 8px 18px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.3s;
+.badge.past {
+    background-color: #dc3545; /* Red for past bookings */
 }
 
-.edit-btn:hover {
-  background-color: #0b7dda;
-}
-
-.delete-btn {
-  background-color: #f44336;
-  color: white;
-  padding: 8px 18px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.3s;
-}
-
-.delete-btn:hover {
-  background-color: #d32f2f;
-}
-
-.no-bookings {
-  text-align: center;
-  color: #777;
-  font-size: 18px;
-  margin-top: 50px;
-}
-
-/* Back link */
-.back-link {
-  display: inline-block;
-  text-decoration: none;
-  color: #fff;
-  background-color: #4CAF50;
-  padding: 12px 28px;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: 0.3s;
-}
-
-.back-link:hover {
-  background-color: #45a049;
-}
-
-/* Scroll wrapper for booking list */
-.bookings-wrapper {
-  max-height: 600px;
-  overflow-y: auto;
-  padding-right: 10px;
-  margin-bottom: 20px;
-}
