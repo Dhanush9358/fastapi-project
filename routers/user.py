@@ -98,15 +98,12 @@ async def forgot_post(
     db: Session = Depends(get_db)
 ):
     # ✅ Check if email ends with @gmail.com
-    if not email.lower().endswith("@gmail.com"):
-        return templates.TemplateResponse(
-            "forgot.html", 
-            {"request": request, "msg": "Please enter a valid Gmail address ending with @gmail.com"}
-        )
+    if not email.endswith("@gmail.com"):
+        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Email must end with @gmail.com"})
     
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Invalid email"})
+        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Please enter your correct registered Email"})
 
     # Token valid for 15 minutes
     reset_token = create_access_token({"sub": user.username}, expires_delta=timedelta(minutes=15))
