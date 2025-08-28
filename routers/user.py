@@ -10,6 +10,7 @@ from auth import hash_password, verify_password, create_access_token, decode_acc
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+from schemas import EmailRequest
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -97,9 +98,9 @@ async def forgot_post(
     email: EmailStr = Form(...),
     db: Session = Depends(get_db)
 ):
-    # ✅ Check if email ends with @gmail.com
-    if not email.endswith("@gmail.com"):
-        return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Email must end with @gmail.com"})
+    # # ✅ Check if email ends with @gmail.com
+    # if not email.endswith("@gmail.com"):
+    #     return templates.TemplateResponse("forgot.html", {"request": request, "msg": "Email must end with @gmail.com"})
     
     user = db.query(User).filter(User.email == email).first()
     if not user:
